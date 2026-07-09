@@ -132,6 +132,22 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 }
 .card-actions { display: flex; gap: 2px; flex-shrink: 0; }
 
+.interval-card {
+  touch-action: pan-y;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+.interval-card.dragging {
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
+  opacity: 0.95;
+  cursor: grabbing;
+  pointer-events: none;
+}
+.drag-placeholder {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+
 .play-btn { color: var(--accent); }
 .delete-btn:active, .remove-btn:active { color: var(--danger); }
 

@@ -61,6 +61,8 @@ export function renderEditor(root, nav, workoutId) {
     const cardTpl = document.getElementById("tpl-interval-card");
     const nodes = workout.intervals.map((interval) => {
       const node = cardTpl.content.cloneNode(true);
+      const card = node.querySelector(".interval-card");
+      card.dataset.id = interval.id;
       node.querySelector(".card-title").textContent = interval.name;
       node.querySelector(".card-meta").textContent = intervalMeta(interval);
       node.querySelector(".duplicate-btn").addEventListener("click", () => {
@@ -74,9 +76,103 @@ export function renderEditor(root, nav, workoutId) {
         workout.intervals = workout.intervals.filter((i) => i.id !== interval.id);
         renderIntervalList();
       });
+      enableDragReorder(card);
       return node;
     });
     listEl.replaceChildren(...nodes);
+  }
+
+  const HOLD_MS = 300;
+  const MOVE_CANCEL_PX = 8;
+
+  function enableDragReorder(card) {
+    card.addEventListener("pointerdown", (e) => {
+      if (e.target.closest(".card-actions")) return;
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      let holdTimer = setTimeout(() => {
+        cleanup();
+        beginDrag(e, card);
+      }, HOLD_MS);
+
+      function onEarlyMove(ev) {
+        if (Math.abs(ev.clientX - startX) > MOVE_CANCEL_PX || Math.abs(ev.clientY - startY) > MOVE_CANCEL_PX) {
+          cleanup();
+        }
+      }
+      function cleanup() {
+        clearTimeout(holdTimer);
+        document.removeEventListener("pointermove", onEarlyMove);
+        document.removeEventListener("pointerup", cleanup);
+        document.removeEventListener("pointercancel", cleanup);
+      }
+      document.addEventListener("pointermove", onEarlyMove);
+      document.addEventListener("pointerup", cleanup);
+      document.addEventListener("pointercancel", cleanup);
+    });
+  }
+
+  function beginDrag(e, card) {
+    const listEl = root.querySelector("#interval-list");
+    const rect = card.getBoundingClientRect();
+
+    if (navigator.vibrate) navigator.vibrate(12);
+
+    const placeholder = document.createElement("div");
+    placeholder.className = "drag-placeholder";
+    placeholder.style.height = rect.height + "px";
+    card.before(placeholder);
+
+    document.body.style.touchAction = "none";
+    card.classList.add("dragging");
+    card.style.position = "fixed";
+    card.style.left = rect.left + "px";
+    card.style.top = rect.top + "px";
+    card.style.width = rect.width + "px";
+    document.body.appendChild(card);
+
+    const startY = e.clientY;
+
+    function onMove(ev) {
+      const dy = ev.clientY - startY;
+      card.style.top = rect.top + dy + "px";
+
+      const cardMidY = rect.top + dy + rect.height / 2;
+      const siblings = [...listEl.children].filter((c) => c !== placeholder);
+      let target = null;
+      for (const sib of siblings) {
+        const sRect = sib.getBoundingClientRect();
+        if (cardMidY < sRect.top + sRect.height / 2) {
+          target = sib;
+          break;
+        }
+      }
+      if (target) listEl.insertBefore(placeholder, target);
+      else listEl.appendChild(placeholder);
+    }
+
+    function onUp() {
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
+      document.body.style.touchAction = "";
+
+      card.classList.remove("dragging");
+      card.style.position = "";
+      card.style.left = "";
+      card.style.top = "";
+      card.style.width = "";
+      placeholder.replaceWith(card);
+
+      const newOrder = [...listEl.querySelectorAll(".interval-card")].map((el) => el.dataset.id);
+      workout.intervals.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
+    }
+
+    document.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerup", onUp);
+    document.addEventListener("pointercancel", onUp);
   }
 
   function openPicker() {
