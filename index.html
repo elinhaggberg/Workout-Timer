@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>Workout Timer</title>
+  <meta name="description" content="A simple, ad-free workout interval timer." />
+  <meta name="theme-color" content="#0b0d0f" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <template id="tpl-home">
+    <header class="topbar">
+      <h1>Workouts</h1>
+    </header>
+    <div class="workout-list" id="workout-list"></div>
+    <button class="fab" id="add-workout-btn" aria-label="New workout">+</button>
+  </template>
+
+  <template id="tpl-workout-card">
+    <article class="card workout-card">
+      <div class="card-main">
+        <h2 class="card-title"></h2>
+        <p class="card-meta"></p>
+      </div>
+      <div class="card-actions">
+        <button class="icon-btn edit-btn" aria-label="Edit workout" title="Edit">✎</button>
+        <button class="icon-btn delete-btn" aria-label="Delete workout" title="Delete">🗑</button>
+        <button class="icon-btn play-btn" aria-label="Start workout" title="Start">▶</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-editor">
+    <header class="topbar">
+      <button class="icon-btn back-btn" aria-label="Back">←</button>
+      <input class="workout-name-input" type="text" placeholder="Workout name" maxlength="60" />
+      <button class="text-btn save-workout-btn">Save</button>
+    </header>
+    <div class="interval-list" id="interval-list"></div>
+    <button class="fab" id="add-interval-btn" aria-label="Add interval">+</button>
+  </template>
+
+  <template id="tpl-interval-card">
+    <article class="card interval-card">
+      <div class="card-main">
+        <h3 class="card-title"></h3>
+        <p class="card-meta"></p>
+      </div>
+      <div class="card-actions">
+        <button class="icon-btn duplicate-btn" aria-label="Duplicate" title="Duplicate">⧉</button>
+        <button class="icon-btn edit-btn" aria-label="Edit" title="Edit">✎</button>
+        <button class="icon-btn remove-btn" aria-label="Remove" title="Remove">✕</button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-interval-picker">
+    <div class="sheet">
+      <header class="sheet-header">
+        <h2>Add interval</h2>
+        <button class="icon-btn close-btn" aria-label="Close">✕</button>
+      </header>
+      <button class="text-btn new-interval-btn">+ New interval</button>
+      <div class="drawer-list" id="drawer-list"></div>
+    </div>
+  </template>
+
+  <template id="tpl-drawer-item">
+    <button class="card drawer-item">
+      <span class="card-title"></span>
+      <span class="card-meta"></span>
+    </button>
+  </template>
+
+  <template id="tpl-interval-form">
+    <div class="sheet">
+      <header class="sheet-header">
+        <h2 class="form-title">New interval</h2>
+        <button class="icon-btn close-btn" aria-label="Close">✕</button>
+      </header>
+      <form id="interval-form">
+        <label class="field">
+          <span>Name</span>
+          <input type="text" name="name" maxlength="40" required autocomplete="off" />
+        </label>
+        <label class="field">
+          <span>Type</span>
+          <div class="segmented">
+            <button type="button" class="segmented-option" data-type="timer">Timer</button>
+            <button type="button" class="segmented-option" data-type="reps">Reps</button>
+          </div>
+        </label>
+        <label class="field" id="amount-field">
+          <span id="amount-label">Duration (seconds)</span>
+          <input type="number" name="amount" min="1" max="9999" required inputmode="numeric" />
+        </label>
+        <div class="form-actions">
+          <button type="button" class="text-btn secondary" id="update-saved-btn">Update saved interval</button>
+          <button type="submit" class="text-btn primary" id="save-interval-btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </template>
+
+  <template id="tpl-player">
+    <header class="topbar player-topbar">
+      <button class="icon-btn back-btn" aria-label="Exit">✕</button>
+      <span class="total-timer" id="total-timer">00:00</span>
+      <span class="interval-count" id="interval-count"></span>
+    </header>
+    <div class="player-stage">
+      <p class="interval-name" id="interval-name"></p>
+      <div class="stage-display" id="stage-display">
+        <span class="big-number" id="big-number">–</span>
+        <span class="big-label" id="big-label"></span>
+      </div>
+    </div>
+    <div class="player-controls">
+      <button class="round-btn" id="prev-btn" aria-label="Previous interval">⏮</button>
+      <button class="round-btn round-btn-lg" id="play-pause-btn" aria-label="Play or pause">▶</button>
+      <button class="round-btn" id="next-btn" aria-label="Next interval">⏭</button>
+    </div>
+  </template>
+
+  <template id="tpl-finish">
+    <div class="finish-screen">
+      <canvas id="confetti-canvas"></canvas>
+      <div class="finish-card">
+        <h1>Well done! 💪</h1>
+        <div class="summary-box" id="summary-box"></div>
+        <button class="text-btn primary" id="copy-btn">Copy summary</button>
+        <button class="text-btn" id="done-btn">Back to workouts</button>
+      </div>
+    </div>
+  </template>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
