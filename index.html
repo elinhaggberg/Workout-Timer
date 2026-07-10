@@ -2,6 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <script>
+    // Applied before the stylesheet paints, since the module script that
+    // normally owns theming (js/theme.js) runs after HTML parsing and would
+    // otherwise flash the default dark theme first on every load.
+    try {
+      var themeMode = (JSON.parse(localStorage.getItem("wt_theme_v1") || "{}") || {}).mode;
+      if (themeMode) document.documentElement.dataset.theme = themeMode;
+    } catch (e) {}
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <title>Workout Timer</title>
   <meta name="description" content="A simple, ad-free workout interval timer." />
@@ -62,6 +71,17 @@
         <h2>Settings</h2>
         <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
       </header>
+      <button type="button" class="menu-item" id="theme-btn">
+        <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+          <rect x="32" y="86" width="448" height="32" rx="16" />
+          <circle cx="176" cy="102" r="40" />
+          <rect x="32" y="240" width="448" height="32" rx="16" />
+          <circle cx="336" cy="256" r="40" />
+          <rect x="32" y="394" width="448" height="32" rx="16" />
+          <circle cx="256" cy="410" r="40" />
+        </svg>
+        <span>Theme</span>
+      </button>
       <button type="button" class="menu-item" id="export-all-btn">
         <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M384 192c53 0 96-43 96-96s-43-96-96-96-96 43-96 96c0 5.4 .5 10.8 1.3 16L159.6 184.1c-16.9-15-39.2-24.1-63.6-24.1-53 0-96 43-96 96s43 96 96 96c24.4 0 46.6-9.1 63.6-24.1L289.3 400c-.9 5.2-1.3 10.5-1.3 16 0 53 43 96 96 96s96-43 96-96-43-96-96-96c-24.4 0-46.6 9.1-63.6 24.1L190.7 272c.9-5.2 1.3-10.5 1.3-16s-.5-10.8-1.3-16l129.7-72.1c16.9 15 39.2 24.1 63.6 24.1z"/></svg>
         <span>Export all data</span>
@@ -70,6 +90,39 @@
         <svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M64 0C28.7 0 0 28.7 0 64l0 240 182.1 0-31-31c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l72 72c9.4 9.4 9.4 24.6 0 33.9l-72 72c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l31-31-182.1 0 0 96c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-277.5c0-17-6.7-33.3-18.7-45.3L258.7 18.7C246.7 6.7 230.5 0 213.5 0L64 0zM325.5 176L232 176c-13.3 0-24-10.7-24-24L208 58.5 325.5 176z"/></svg>
         <span>Import</span>
       </button>
+    </div>
+  </template>
+
+  <template id="tpl-theme-picker">
+    <div class="sheet">
+      <header class="sheet-header">
+        <h2>Theme</h2>
+        <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+      </header>
+      <div class="theme-option-list">
+        <button type="button" class="theme-option" data-theme-mode="dark">
+          <span class="theme-swatch-preview dark"></span>
+          <span>Dark</span>
+        </button>
+        <button type="button" class="theme-option" data-theme-mode="light">
+          <span class="theme-swatch-preview light"></span>
+          <span>Light</span>
+        </button>
+        <button type="button" class="theme-option" data-theme-mode="playful">
+          <span class="theme-swatch-preview playful"></span>
+          <span>Playful</span>
+        </button>
+      </div>
+      <div class="playful-accent-picker hidden" id="playful-accent-picker">
+        <p class="playful-accent-label">Accent color</p>
+        <div class="swatch-row">
+          <button type="button" class="swatch-btn" data-accent="lipstick" aria-label="Lipstick"></button>
+          <button type="button" class="swatch-btn" data-accent="grapefruit" aria-label="Grapefruit"></button>
+          <button type="button" class="swatch-btn" data-accent="sunshine" aria-label="Sunshine"></button>
+          <button type="button" class="swatch-btn" data-accent="lilac" aria-label="Lilac"></button>
+          <button type="button" class="swatch-btn" data-accent="midnight" aria-label="Midnight"></button>
+        </div>
+      </div>
     </div>
   </template>
 

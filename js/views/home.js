@@ -13,6 +13,7 @@ import { workoutMeta, intervalMeta, setMeta, isSet } from "../util.js";
 import { unlockAudio } from "../audio.js";
 import { openSheet } from "../sheet.js";
 import { shareOrDownload, filenameFor } from "../share.js";
+import { getTheme, setTheme } from "../theme.js";
 
 export function renderHome(root, nav) {
   const tpl = document.getElementById("tpl-home");
@@ -105,6 +106,10 @@ export function renderHome(root, nav) {
   function openSettingsMenu() {
     const sheet = openSheet("tpl-settings-menu");
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+    sheet.el.querySelector("#theme-btn").addEventListener("click", () => {
+      sheet.close();
+      openThemePicker();
+    });
     sheet.el.querySelector("#export-all-btn").addEventListener("click", async () => {
       const data = exportBackupData();
       const stamp = new Date().toISOString().slice(0, 10);
@@ -115,6 +120,37 @@ export function renderHome(root, nav) {
       sheet.close();
       openImport();
     });
+  }
+
+  function openThemePicker() {
+    const sheet = openSheet("tpl-theme-picker");
+    sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+
+    const accentPicker = sheet.el.querySelector("#playful-accent-picker");
+    const themeButtons = sheet.el.querySelectorAll(".theme-option");
+    const swatchButtons = sheet.el.querySelectorAll(".swatch-btn");
+
+    function renderActiveState() {
+      const pref = getTheme();
+      themeButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.themeMode === pref.mode));
+      swatchButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.accent === pref.playfulAccent));
+      accentPicker.classList.toggle("hidden", pref.mode !== "playful");
+    }
+
+    themeButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setTheme({ ...getTheme(), mode: btn.dataset.themeMode });
+        renderActiveState();
+      });
+    });
+    swatchButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        setTheme({ ...getTheme(), playfulAccent: btn.dataset.accent });
+        renderActiveState();
+      });
+    });
+
+    renderActiveState();
   }
 
   async function shareWorkout(workout) {

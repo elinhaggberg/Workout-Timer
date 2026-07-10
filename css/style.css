@@ -5,12 +5,41 @@
   --border: #2a2f36;
   --text: #f2f3f5;
   --text-dim: #8a919c;
-  --accent: #d4ff3d;
-  --accent-text: #0b0d0f;
+  --accent: #b9a6ff;
+  --accent-text: #1c1330;
   --danger: #ff5d5d;
+  --font-heading: inherit;
   --radius: 14px;
   --gap: 14px;
   font-size: 16px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #edeff2;
+  --border: #dde1e7;
+  --text: #16181c;
+  --text-dim: #6b7280;
+  --accent: #3e7bd9;
+  --accent-text: #ffffff;
+  --danger: #d9433f;
+}
+
+/* --accent/--accent-text are overridden inline via theme.js for the user's
+   chosen swatch; these are just the default (Lipstick) shown before that
+   runs, or if no swatch has been picked yet. */
+:root[data-theme="playful"] {
+  --bg: #f5eedc;
+  --surface: #fffcf4;
+  --surface-2: #efe6d0;
+  --border: #e3d7b8;
+  --text: #241c1c;
+  --text-dim: #8a7f6d;
+  --accent: #ee4c9b;
+  --accent-text: #ffffff;
+  --danger: #e0454a;
+  --font-heading: ui-serif, Georgia, "Times New Roman", serif;
 }
 
 * { box-sizing: border-box; }
@@ -54,7 +83,8 @@ button {
   cursor: pointer;
 }
 
-h1, h2, h3 { margin: 0; font-weight: 600; }
+h1, h2, h3 { margin: 0; font-weight: 600; font-family: var(--font-heading); }
+.interval-name, .choice-title, .workout-name-input { font-family: var(--font-heading); }
 
 /* Topbar */
 .topbar {
@@ -312,7 +342,7 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(212, 255, 61, 0.25);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 .fab:active { transform: scale(0.95); }
 
@@ -424,6 +454,53 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 }
 .menu-item:last-child { border-bottom: none; }
 .menu-item .icon { width: 1.1em; height: 1.1em; color: var(--text-dim); flex-shrink: 0; }
+
+/* Theme picker */
+.theme-option-list {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0 20px;
+}
+.theme-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.theme-option.active { border-color: var(--accent); color: var(--text); }
+.theme-swatch-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+}
+.theme-swatch-preview.dark { background: #b9a6ff; }
+.theme-swatch-preview.light { background: #3e7bd9; }
+.theme-swatch-preview.playful { background: #ee4c9b; }
+
+.playful-accent-picker { padding-bottom: 8px; }
+.playful-accent-label { color: var(--text-dim); font-size: 0.85rem; margin: 0 0 10px; }
+.swatch-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.swatch-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  position: relative;
+}
+.swatch-btn.active { border-color: var(--text); }
+.swatch-btn[data-accent="lipstick"] { background: #ee4c9b; }
+.swatch-btn[data-accent="grapefruit"] { background: #f2542d; }
+.swatch-btn[data-accent="sunshine"] { background: #f5b942; }
+.swatch-btn[data-accent="lilac"] { background: #b9a6ff; }
+.swatch-btn[data-accent="midnight"] { background: #3b2352; }
 
 /* Import */
 .import-hint { color: var(--text-dim); font-size: 0.88rem; margin: 4px 0 14px; }
