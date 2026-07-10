@@ -124,22 +124,20 @@ export function renderHome(root, nav) {
 
   function openImport() {
     const sheet = openSheet("tpl-import");
-    const textarea = sheet.el.querySelector(".import-textarea");
     const fileInput = sheet.el.querySelector(".import-file-input");
     const messageEl = sheet.el.querySelector(".import-message");
 
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
     sheet.el.querySelector(".import-file-btn").addEventListener("click", () => fileInput.click());
+
     fileInput.addEventListener("change", async () => {
       const file = fileInput.files[0];
-      if (file) textarea.value = await file.text();
-    });
-
-    sheet.el.querySelector(".import-confirm-btn").addEventListener("click", () => {
+      if (!file) return;
       messageEl.classList.remove("error");
+
       let parsed;
       try {
-        parsed = JSON.parse(textarea.value.trim());
+        parsed = JSON.parse(await file.text());
       } catch {
         messageEl.textContent = "That doesn't look like valid JSON.";
         messageEl.classList.add("error");

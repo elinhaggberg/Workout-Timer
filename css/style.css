@@ -426,19 +426,6 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 
 /* Import */
 .import-hint { color: var(--text-dim); font-size: 0.88rem; margin: 4px 0 14px; }
-.import-textarea {
-  width: 100%;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 12px;
-  color: var(--text);
-  font-size: 0.85rem;
-  font-family: ui-monospace, monospace;
-  resize: vertical;
-  margin-bottom: 12px;
-}
-.import-textarea:focus { outline: none; border-color: var(--accent); }
 .import-file-btn { width: 100%; text-align: center; }
 .import-message {
   font-size: 0.88rem;
