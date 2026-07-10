@@ -1,5 +1,6 @@
 const WORKOUTS_KEY = "wt_workouts_v1";
 const DRAWER_KEY = "wt_interval_drawer_v1";
+const SOUND_KEY = "wt_sound_enabled_v1";
 
 function uid() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -88,7 +89,17 @@ export function makeIntervalInstance({ name, type, amount, drawerId = null }) {
 }
 
 export function makeSetContainer({ rounds = 2 } = {}) {
-  return { id: uid(), kind: "set", rounds, intervals: [] };
+  return { id: uid(), kind: "set", rounds, name: "", intervals: [] };
+}
+
+// ---- Preferences ----
+
+export function getSoundEnabled() {
+  return localStorage.getItem(SOUND_KEY) === "true";
+}
+
+export function setSoundEnabled(value) {
+  localStorage.setItem(SOUND_KEY, value ? "true" : "false");
 }
 
 export { uid };

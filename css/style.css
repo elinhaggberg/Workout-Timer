@@ -143,6 +143,17 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 }
 .card-actions { display: flex; gap: 2px; flex-shrink: 0; }
 
+input.card-title {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+input.card-title:focus { outline: none; }
+input.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
+
 .interval-card, .set-card {
   -webkit-user-drag: none;
 }
@@ -239,6 +250,10 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 
 .play-btn { color: var(--accent); }
 .delete-btn:active, .remove-btn:active { color: var(--danger); }
+
+/* Bigger tap targets for the home screen's workout cards specifically. */
+.workout-card .icon-btn { width: 48px; height: 48px; font-size: 1.3rem; }
+.workout-card .card-actions { gap: 6px; }
 
 .drawer-item {
   width: 100%;
@@ -355,6 +370,8 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 
 /* Player */
 .player-topbar { justify-content: space-between; }
+.player-topbar-left { display: flex; gap: 2px; }
+.sound-toggle-btn.active { color: var(--accent); }
 .total-timer {
   font-variant-numeric: tabular-nums;
   font-size: 1.1rem;

@@ -1,4 +1,4 @@
-import { getWorkout } from "../storage.js";
+import { getWorkout, getSoundEnabled, setSoundEnabled } from "../storage.js";
 import { formatClock, flattenNodes } from "../util.js";
 import * as audio from "../audio.js";
 import { setWakeLockWanted } from "../wakelock.js";
@@ -26,6 +26,7 @@ export function renderPlayer(root, nav, workoutId) {
   const prevBtn = root.querySelector("#prev-btn");
   const nextBtn = root.querySelector("#next-btn");
   const exitBtn = root.querySelector(".back-btn");
+  const soundToggleBtn = root.querySelector("#sound-toggle-btn");
 
   const state = {
     index: 0,
@@ -40,13 +41,17 @@ export function renderPlayer(root, nav, workoutId) {
 
   let tickHandle = null;
 
+  audio.setEnabled(getSoundEnabled());
+  renderSoundToggle();
+
   enterInterval(0);
-  render();
+  togglePlay(); // start playing immediately — no extra tap needed
 
   playPauseBtn.addEventListener("click", togglePlay);
   prevBtn.addEventListener("click", goPrev);
   nextBtn.addEventListener("click", goNext);
   exitBtn.addEventListener("click", exit);
+  soundToggleBtn.addEventListener("click", toggleSound);
 
   function togglePlay() {
     if (!state.started) {
@@ -58,6 +63,21 @@ export function renderPlayer(root, nav, workoutId) {
     if (state.running) startTicking();
     else stopTicking();
     render();
+  }
+
+  function toggleSound() {
+    const next = !audio.isEnabled();
+    audio.setEnabled(next);
+    setSoundEnabled(next);
+    if (next) audio.unlockAudio();
+    renderSoundToggle();
+  }
+
+  function renderSoundToggle() {
+    const on = audio.isEnabled();
+    soundToggleBtn.textContent = on ? "🔊" : "🔇";
+    soundToggleBtn.classList.toggle("active", on);
+    soundToggleBtn.setAttribute("aria-label", on ? "Mute sound" : "Unmute sound");
   }
 
   function startTicking() {

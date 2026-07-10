@@ -1,4 +1,13 @@
 let ctx = null;
+let enabled = false;
+
+export function setEnabled(value) {
+  enabled = value;
+}
+
+export function isEnabled() {
+  return enabled;
+}
 
 function getCtx() {
   if (!ctx) {
@@ -15,6 +24,7 @@ export function unlockAudio() {
 }
 
 function tone(freq, startOffset, duration, { type = "sine", volume = 0.35 } = {}) {
+  if (!enabled) return;
   const c = getCtx();
   const osc = c.createOscillator();
   const gain = c.createGain();

@@ -129,6 +129,12 @@ export function renderEditor(root, nav, workoutId) {
     frag.querySelector(".card-meta").textContent = setMeta(setNode);
     frag.querySelector(".rounds-value").textContent = setNode.rounds;
 
+    const nameInput = frag.querySelector(".set-name-input");
+    nameInput.value = setNode.name || "";
+    nameInput.addEventListener("input", () => {
+      setNode.name = nameInput.value;
+    });
+
     frag.querySelector(".rounds-dec").addEventListener("click", () => {
       setNode.rounds = Math.max(1, setNode.rounds - 1);
       renderIntervalList();
