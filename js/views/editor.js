@@ -10,22 +10,7 @@ import {
   uid,
 } from "../storage.js";
 import { intervalMeta, isSet, setMeta } from "../util.js";
-
-function openSheet(templateId) {
-  const tpl = document.getElementById(templateId);
-  const backdrop = document.createElement("div");
-  backdrop.className = "sheet-backdrop";
-  backdrop.appendChild(tpl.content.cloneNode(true));
-  document.body.appendChild(backdrop);
-
-  function close() {
-    backdrop.remove();
-  }
-  backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) close();
-  });
-  return { el: backdrop, close };
-}
+import { openSheet } from "../sheet.js";
 
 // Only one drag gesture can be in flight at a time. Tracking
 // it here lets a new pointerdown forcibly tear down a stuck previous session

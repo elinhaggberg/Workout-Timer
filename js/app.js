@@ -5,6 +5,7 @@ import { renderFinish } from "./views/finish.js";
 
 const root = document.getElementById("app");
 let pendingFinishSummary = null;
+let pendingAdhocWorkout = null;
 
 const nav = {
   toHome: () => {
@@ -15,6 +16,12 @@ const nav = {
   },
   toPlayer: (id) => {
     location.hash = `#/play/${id}`;
+  },
+  // For ephemeral, unsaved workouts (e.g. the quick Tabata timer) that have
+  // no id to look up in storage.
+  toPlayerAdhoc: (workout) => {
+    pendingAdhocWorkout = workout;
+    location.hash = "#/play/adhoc";
   },
   toFinish: (summary) => {
     pendingFinishSummary = summary;
@@ -33,7 +40,15 @@ function route() {
       renderEditor(root, nav, param === "new" ? null : param);
       break;
     case "play":
-      renderPlayer(root, nav, param);
+      if (param === "adhoc") {
+        if (!pendingAdhocWorkout) {
+          nav.toHome();
+          return;
+        }
+        renderPlayer(root, nav, null, pendingAdhocWorkout);
+      } else {
+        renderPlayer(root, nav, param);
+      }
       break;
     case "finish":
       if (!pendingFinishSummary) {

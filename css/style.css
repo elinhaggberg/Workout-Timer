@@ -112,7 +112,10 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 }
 .text-btn.primary { color: var(--accent-text); background: var(--accent); }
 .text-btn.secondary { color: var(--text-dim); border: 1px solid var(--border); }
+.text-btn.danger { color: #fff; background: var(--danger); }
 .text-btn:active { opacity: 0.8; }
+
+.workout-card { cursor: pointer; }
 
 /* Lists */
 .workout-list, .interval-list, .drawer-list {
@@ -312,6 +315,17 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   box-shadow: 0 6px 20px rgba(212, 255, 61, 0.25);
 }
 .fab:active { transform: scale(0.95); }
+
+.fab-secondary {
+  bottom: calc(28px + 56px + 14px + env(safe-area-inset-bottom));
+  width: 52px;
+  height: 52px;
+  font-size: 1.4rem;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
 @media (max-width: 560px) {
   .fab { right: 24px; }
 }
@@ -348,6 +362,51 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   padding: 10px 0 14px;
 }
 .sheet-header h2 { flex: 1; font-size: 1.15rem; }
+
+/* Workout preview modal */
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0 6px;
+}
+.preview-header .delete-preview-btn { margin-left: auto; }
+.preview-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 4px 0 2px;
+}
+.preview-meta { margin-bottom: 14px; }
+.preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+.preview-card { pointer-events: none; }
+.play-preview-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 1.05rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.play-preview-btn:active { opacity: 0.85; }
+.play-preview-btn .icon { width: 1.1em; height: 1.1em; }
+
+/* Delete confirmation */
+.confirm-sheet { gap: 4px; padding-top: 20px; }
+.confirm-title { font-size: 1.15rem; margin-bottom: 4px; }
+.confirm-message { color: var(--text-dim); font-size: 0.92rem; margin: 0 0 18px; }
 
 .new-interval-btn {
   text-align: left;

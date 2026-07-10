@@ -7,8 +7,8 @@ import { ICON_PLAY, ICON_PAUSE, ICON_VOLUME_HIGH, ICON_VOLUME_XMARK } from "../i
 const LEAD_IN_SECONDS = 3;
 const WARNING_SECONDS = 3;
 
-export function renderPlayer(root, nav, workoutId) {
-  const workout = getWorkout(workoutId);
+export function renderPlayer(root, nav, workoutId, adhocWorkout) {
+  const workout = adhocWorkout || getWorkout(workoutId);
   const sequence = workout ? flattenNodes(workout.intervals) : [];
   if (!workout || sequence.length === 0) {
     nav.toHome();
