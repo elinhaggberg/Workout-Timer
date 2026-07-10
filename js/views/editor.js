@@ -27,11 +27,7 @@ function openSheet(templateId) {
   return { el: backdrop, close };
 }
 
-const HOLD_MS = 300;
-const MOVE_CANCEL_PX = 8;
-const DRAG_IGNORE_SELECTOR = ".card-actions, .rounds-stepper, .add-to-set-btn, .set-intervals";
-
-// Only one drag (or hold-to-drag) gesture can be in flight at a time. Tracking
+// Only one drag gesture can be in flight at a time. Tracking
 // it here lets a new pointerdown forcibly tear down a stuck previous session
 // (e.g. one a native browser gesture interrupted before it could clean up
 // itself), instead of leaking listeners that corrupt every attempt after it.
@@ -82,9 +78,28 @@ export function renderEditor(root, nav, workoutId) {
       listEl.replaceChildren(empty);
       return;
     }
-    const cards = workout.intervals.map((node) => (isSet(node) ? createSetCardEl(node) : createTopLevelIntervalEl(node)));
+    const cards = workout.intervals.map((node) =>
+      isSet(node)
+        ? createSetCardEl(node, listEl, (order) => resortArray(workout.intervals, order))
+        : createIntervalCardEl(
+            node,
+            {
+              onEdit: () => openIntervalForm({ mode: "edit", interval: node }),
+              onDuplicate: () => {
+                const idx = workout.intervals.indexOf(node);
+                workout.intervals.splice(idx + 1, 0, { ...node, id: uid() });
+                renderIntervalList();
+              },
+              onRemove: () => {
+                workout.intervals = workout.intervals.filter((n) => n.id !== node.id);
+                renderIntervalList();
+              },
+            },
+            listEl,
+            (order) => resortArray(workout.intervals, order)
+          )
+    );
     listEl.replaceChildren(...cards);
-    cards.forEach((card) => enableDragReorder(card, listEl, (order) => resortArray(workout.intervals, order)));
 
     if (scrollToId) {
       const target = listEl.querySelector(`[data-id="${scrollToId}"]`);
@@ -92,36 +107,24 @@ export function renderEditor(root, nav, workoutId) {
     }
   }
 
-  function createTopLevelIntervalEl(interval) {
-    return createIntervalCardEl(interval, {
-      onEdit: () => openIntervalForm({ mode: "edit", interval }),
-      onDuplicate: () => {
-        const idx = workout.intervals.indexOf(interval);
-        workout.intervals.splice(idx + 1, 0, { ...interval, id: uid() });
-        renderIntervalList();
-      },
-      onRemove: () => {
-        workout.intervals = workout.intervals.filter((n) => n.id !== interval.id);
-        renderIntervalList();
-      },
-    });
-  }
-
-  function createIntervalCardEl(interval, { onEdit, onDuplicate, onRemove }) {
+  function createIntervalCardEl(interval, { onEdit, onDuplicate, onRemove }, listEl, onReorder) {
     const frag = document.getElementById("tpl-interval-card").content.cloneNode(true);
     const card = frag.querySelector(".interval-card");
+    const handle = frag.querySelector(".drag-handle");
     card.dataset.id = interval.id;
     frag.querySelector(".card-title").textContent = interval.name;
     frag.querySelector(".card-meta").textContent = intervalMeta(interval);
     frag.querySelector(".duplicate-btn").addEventListener("click", onDuplicate);
     frag.querySelector(".edit-btn").addEventListener("click", onEdit);
     frag.querySelector(".remove-btn").addEventListener("click", onRemove);
+    enableDragReorder(card, handle, listEl, onReorder);
     return card;
   }
 
-  function createSetCardEl(setNode) {
+  function createSetCardEl(setNode, listEl, onReorder) {
     const frag = document.getElementById("tpl-set-card").content.cloneNode(true);
     const card = frag.querySelector(".set-card");
+    const handle = frag.querySelector(".drag-handle");
     card.dataset.id = setNode.id;
     frag.querySelector(".card-meta").textContent = setMeta(setNode);
     frag.querySelector(".rounds-value").textContent = setNode.rounds;
@@ -153,70 +156,46 @@ export function renderEditor(root, nav, workoutId) {
       nestedListEl.appendChild(empty);
     } else {
       const nestedCards = setNode.intervals.map((interval) =>
-        createIntervalCardEl(interval, {
-          onEdit: () => openIntervalForm({ mode: "edit", interval }),
-          onDuplicate: () => {
-            const idx = setNode.intervals.indexOf(interval);
-            setNode.intervals.splice(idx + 1, 0, { ...interval, id: uid() });
-            renderIntervalList();
+        createIntervalCardEl(
+          interval,
+          {
+            onEdit: () => openIntervalForm({ mode: "edit", interval }),
+            onDuplicate: () => {
+              const idx = setNode.intervals.indexOf(interval);
+              setNode.intervals.splice(idx + 1, 0, { ...interval, id: uid() });
+              renderIntervalList();
+            },
+            onRemove: () => {
+              setNode.intervals = setNode.intervals.filter((i) => i.id !== interval.id);
+              renderIntervalList();
+            },
           },
-          onRemove: () => {
-            setNode.intervals = setNode.intervals.filter((i) => i.id !== interval.id);
-            renderIntervalList();
-          },
-        })
+          nestedListEl,
+          (order) => resortArray(setNode.intervals, order)
+        )
       );
       nestedListEl.replaceChildren(...nestedCards);
-      nestedCards.forEach((nestedCard) =>
-        enableDragReorder(nestedCard, nestedListEl, (order) => resortArray(setNode.intervals, order))
-      );
     }
 
     frag.querySelector(".add-to-set-btn").addEventListener("click", () => openPicker(setNode.intervals));
+    enableDragReorder(card, handle, listEl, onReorder);
 
     return card;
   }
 
-  function enableDragReorder(card, listEl, onReorder) {
-    // Belt-and-suspenders against the browser's own native gestures (text
-    // selection drag, HTML5 drag-and-drop, long-press context menu) hijacking
-    // the pointer stream mid-gesture — when that happens our pointerup/
-    // pointercancel handlers never fire, which used to leak listeners and
-    // corrupt every drag attempt after the first.
-    card.draggable = false;
-    card.addEventListener("dragstart", (e) => e.preventDefault());
-    card.addEventListener("selectstart", (e) => e.preventDefault());
-    card.addEventListener("contextmenu", (e) => e.preventDefault());
-
-    card.addEventListener("pointerdown", (e) => {
-      if (e.target.closest(DRAG_IGNORE_SELECTOR)) return;
+  // The handle has touch-action: none set permanently in CSS, so a touch
+  // starting on it is never eligible to become a native scroll — unlike
+  // toggling touch-action on the fly mid-gesture, which browsers ignore for
+  // a touch that's already in progress. That's what made drag unreliable on
+  // real touch devices even though it looked fine with simulated mouse input.
+  function enableDragReorder(card, handle, listEl, onReorder) {
+    handle.addEventListener("dragstart", (e) => e.preventDefault());
+    handle.addEventListener("contextmenu", (e) => e.preventDefault());
+    handle.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
       forceTeardownActiveDrag();
       e.preventDefault();
-
-      const startX = e.clientX;
-      const startY = e.clientY;
-      let holdTimer = setTimeout(() => {
-        cleanup();
-        beginDrag(e, card, listEl, onReorder);
-      }, HOLD_MS);
-
-      function onEarlyMove(ev) {
-        if (Math.abs(ev.clientX - startX) > MOVE_CANCEL_PX || Math.abs(ev.clientY - startY) > MOVE_CANCEL_PX) {
-          cleanup();
-        }
-      }
-      function cleanup() {
-        clearTimeout(holdTimer);
-        document.removeEventListener("pointermove", onEarlyMove);
-        document.removeEventListener("pointerup", cleanup);
-        document.removeEventListener("pointercancel", cleanup);
-        if (activeDragTeardown === cleanup) activeDragTeardown = null;
-      }
-      activeDragTeardown = cleanup;
-      document.addEventListener("pointermove", onEarlyMove);
-      document.addEventListener("pointerup", cleanup);
-      document.addEventListener("pointercancel", cleanup);
+      beginDrag(e, card, listEl, onReorder);
     });
   }
 
@@ -230,7 +209,6 @@ export function renderEditor(root, nav, workoutId) {
     placeholder.style.height = rect.height + "px";
     card.before(placeholder);
 
-    document.body.style.touchAction = "none";
     card.classList.add("dragging");
     card.style.position = "fixed";
     card.style.left = rect.left + "px";
@@ -239,8 +217,10 @@ export function renderEditor(root, nav, workoutId) {
     document.body.appendChild(card);
 
     const startY = e.clientY;
+    const pointerId = e.pointerId;
 
     function onMove(ev) {
+      if (ev.pointerId !== pointerId) return;
       const dy = ev.clientY - startY;
       card.style.top = rect.top + dy + "px";
 
@@ -265,7 +245,6 @@ export function renderEditor(root, nav, workoutId) {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
       document.removeEventListener("pointercancel", onUp);
-      document.body.style.touchAction = "";
       if (activeDragTeardown === finish) activeDragTeardown = null;
 
       card.classList.remove("dragging");
@@ -281,7 +260,8 @@ export function renderEditor(root, nav, workoutId) {
       }
     }
 
-    function onUp() {
+    function onUp(ev) {
+      if (ev.pointerId !== pointerId) return;
       finish(true);
     }
 
