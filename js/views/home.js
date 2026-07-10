@@ -1,7 +1,18 @@
-import { getWorkouts, getWorkout, deleteWorkout, makeSetContainer, makeIntervalInstance, uid } from "../storage.js";
+import {
+  getWorkouts,
+  getWorkout,
+  deleteWorkout,
+  makeSetContainer,
+  makeIntervalInstance,
+  uid,
+  exportWorkoutData,
+  exportBackupData,
+  importData,
+} from "../storage.js";
 import { workoutMeta, intervalMeta, setMeta, isSet } from "../util.js";
 import { unlockAudio } from "../audio.js";
 import { openSheet } from "../sheet.js";
+import { shareOrDownload, filenameFor } from "../share.js";
 
 export function renderHome(root, nav) {
   const tpl = document.getElementById("tpl-home");
@@ -11,6 +22,7 @@ export function renderHome(root, nav) {
     nav.toEditor(null);
   });
   document.getElementById("tabata-btn").addEventListener("click", openTabataSetup);
+  document.getElementById("settings-btn").addEventListener("click", openSettingsMenu);
 
   renderList();
 
@@ -90,6 +102,59 @@ export function renderHome(root, nav) {
     });
   }
 
+  function openSettingsMenu() {
+    const sheet = openSheet("tpl-settings-menu");
+    sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+    sheet.el.querySelector("#export-all-btn").addEventListener("click", async () => {
+      const data = exportBackupData();
+      const stamp = new Date().toISOString().slice(0, 10);
+      await shareOrDownload(`workout-timer-backup-${stamp}.json`, JSON.stringify(data, null, 2), "Workout Timer backup");
+      sheet.close();
+    });
+    sheet.el.querySelector("#import-btn").addEventListener("click", () => {
+      sheet.close();
+      openImport();
+    });
+  }
+
+  async function shareWorkout(workout) {
+    const data = exportWorkoutData(workout);
+    await shareOrDownload(filenameFor(workout.name), JSON.stringify(data, null, 2), workout.name || "Workout");
+  }
+
+  function openImport() {
+    const sheet = openSheet("tpl-import");
+    const fileInput = sheet.el.querySelector(".import-file-input");
+    const messageEl = sheet.el.querySelector(".import-message");
+
+    sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+    sheet.el.querySelector(".import-file-btn").addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      messageEl.classList.remove("error");
+
+      let parsed;
+      try {
+        parsed = JSON.parse(await file.text());
+      } catch {
+        messageEl.textContent = "That doesn't look like valid JSON.";
+        messageEl.classList.add("error");
+        return;
+      }
+      try {
+        const result = importData(parsed);
+        messageEl.textContent = `Imported ${result.workoutCount} workout${result.workoutCount !== 1 ? "s" : ""}.`;
+        renderList();
+        setTimeout(() => sheet.close(), 900);
+      } catch (err) {
+        messageEl.textContent = err.message || "That doesn't look like a valid export file.";
+        messageEl.classList.add("error");
+      }
+    });
+  }
+
   function confirmDeleteWorkout(w) {
     const sheet = openSheet("tpl-confirm-delete");
     sheet.el.querySelector(".confirm-message").textContent =
@@ -125,6 +190,7 @@ export function renderHome(root, nav) {
       sheet.close();
       nav.toEditor(workout.id);
     });
+    sheet.el.querySelector(".export-preview-btn").addEventListener("click", () => shareWorkout(workout));
     sheet.el.querySelector(".delete-preview-btn").addEventListener("click", () => {
       sheet.close();
       confirmDeleteWorkout(workout);

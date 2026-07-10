@@ -408,6 +408,33 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 .confirm-title { font-size: 1.15rem; margin-bottom: 4px; }
 .confirm-message { color: var(--text-dim); font-size: 0.92rem; margin: 0 0 18px; }
 
+/* Settings menu */
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item .icon { width: 1.1em; height: 1.1em; color: var(--text-dim); flex-shrink: 0; }
+
+/* Import */
+.import-hint { color: var(--text-dim); font-size: 0.88rem; margin: 4px 0 14px; }
+.import-file-btn { width: 100%; text-align: center; }
+.import-message {
+  font-size: 0.88rem;
+  color: var(--accent);
+  min-height: 1.2em;
+  margin: 14px 0 0;
+}
+.import-message.error { color: var(--danger); }
+
 .new-interval-btn {
   text-align: left;
   color: var(--accent);
