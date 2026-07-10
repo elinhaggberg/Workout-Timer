@@ -67,10 +67,6 @@
     <article class="card set-card">
       <div class="set-header">
         <span class="drag-handle" aria-hidden="true">⠿</span>
-        <div class="card-main">
-          <input type="text" class="card-title set-name-input" placeholder="Set" maxlength="40" />
-          <p class="card-meta"></p>
-        </div>
         <div class="rounds-stepper">
           <button type="button" class="icon-btn rounds-dec" aria-label="Fewer rounds">–</button>
           <span class="rounds-value">2</span>
@@ -81,6 +77,8 @@
           <button class="icon-btn remove-btn" aria-label="Remove set" title="Remove">✕</button>
         </div>
       </div>
+      <textarea class="card-title set-name-input" placeholder="Set" maxlength="60" rows="1"></textarea>
+      <p class="card-meta"></p>
       <div class="set-intervals"></div>
       <button type="button" class="text-btn add-to-set-btn">+ Add interval to set</button>
     </article>

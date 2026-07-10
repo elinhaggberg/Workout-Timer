@@ -154,6 +154,22 @@ input.card-title {
 input.card-title:focus { outline: none; }
 input.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 
+textarea.card-title {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  resize: none;
+  overflow: hidden;
+  white-space: normal;
+  line-height: 1.3;
+  font-family: inherit;
+}
+textarea.card-title:focus { outline: none; }
+textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
+
 .interval-card, .set-card {
   -webkit-user-drag: none;
 }
@@ -206,6 +222,7 @@ input.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   border-radius: 10px;
   padding: 2px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 .rounds-stepper .icon-btn { width: 30px; height: 30px; font-size: 1rem; }
 .rounds-value {
