@@ -371,6 +371,7 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   padding: 10px 0 6px;
 }
 .preview-header .delete-preview-btn { margin-left: auto; }
+.play-preview-header-btn { color: var(--accent); }
 .preview-title {
   font-size: 1.3rem;
   font-weight: 700;

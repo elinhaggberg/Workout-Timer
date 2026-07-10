@@ -195,10 +195,12 @@ export function renderHome(root, nav) {
       sheet.close();
       confirmDeleteWorkout(workout);
     });
-    sheet.el.querySelector(".play-preview-btn").addEventListener("click", () => {
+    const playWorkout = () => {
       sheet.close();
       startWorkout(workout.id);
-    });
+    };
+    sheet.el.querySelector(".play-preview-header-btn").addEventListener("click", playWorkout);
+    sheet.el.querySelector(".play-preview-btn").addEventListener("click", playWorkout);
   }
 
   function renderPreviewNode(node) {
