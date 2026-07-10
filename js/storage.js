@@ -92,6 +92,81 @@ export function makeSetContainer({ rounds = 2 } = {}) {
   return { id: uid(), kind: "set", rounds, name: "", intervals: [] };
 }
 
+// ---- Export / import ----
+
+function collectDrawerIds(nodes, ids) {
+  for (const node of nodes) {
+    if (node.kind === "set") collectDrawerIds(node.intervals, ids);
+    else if (node.drawerId) ids.add(node.drawerId);
+  }
+}
+
+// A single-workout export bundles just the drawer entries that workout's
+// intervals reference, so "update saved interval" links survive a round trip
+// without pulling in the whole drawer.
+export function exportWorkoutData(workout) {
+  const referencedIds = new Set();
+  collectDrawerIds(workout.intervals, referencedIds);
+  const drawer = getDrawer().filter((d) => referencedIds.has(d.id));
+  return {
+    type: "workout",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    workouts: [workout],
+    drawer,
+  };
+}
+
+export function exportBackupData() {
+  return {
+    type: "backup",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    workouts: getWorkouts(),
+    drawer: getDrawer(),
+  };
+}
+
+// Both export shapes carry the same { workouts, drawer } structure, so a
+// single import path handles a single-workout file or a full backup alike.
+// Always merges (adds new entries) rather than replacing anything, so a bad
+// or repeated import can't destroy existing data — drawer entries merge by
+// name (same rule as the rest of the app), workouts are always added as new.
+export function importData(data) {
+  if (!data || (data.type !== "workout" && data.type !== "backup") || !Array.isArray(data.workouts)) {
+    throw new Error("That doesn't look like a workout or backup file.");
+  }
+
+  const importedDrawer = Array.isArray(data.drawer) ? data.drawer : [];
+  const oldIdToLocalId = new Map();
+  for (const entry of importedDrawer) {
+    const local = upsertDrawerByName({ name: entry.name, type: entry.type, amount: entry.amount });
+    oldIdToLocalId.set(entry.id, local.id);
+  }
+
+  function remapInterval(interval) {
+    const drawerId = interval.drawerId ? oldIdToLocalId.get(interval.drawerId) || null : null;
+    return { ...interval, id: uid(), drawerId };
+  }
+  function remapNode(node) {
+    if (node.kind === "set") {
+      return { ...node, id: uid(), intervals: node.intervals.map(remapInterval) };
+    }
+    return remapInterval(node);
+  }
+
+  const newWorkouts = data.workouts.map((w) => ({
+    ...w,
+    id: uid(),
+    createdAt: Date.now(),
+    intervals: w.intervals.map(remapNode),
+  }));
+
+  writeJSON(WORKOUTS_KEY, [...getWorkouts(), ...newWorkouts]);
+
+  return { workoutCount: newWorkouts.length, drawerCount: importedDrawer.length };
+}
+
 // ---- Preferences ----
 
 export function getSoundEnabled() {

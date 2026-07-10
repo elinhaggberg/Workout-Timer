@@ -8,9 +8,11 @@ import {
   makeIntervalInstance,
   makeSetContainer,
   uid,
+  exportWorkoutData,
 } from "../storage.js";
 import { intervalMeta, isSet, setMeta } from "../util.js";
 import { openSheet } from "../sheet.js";
+import { shareOrDownload, filenameFor } from "../share.js";
 
 // Only one drag gesture can be in flight at a time. Tracking
 // it here lets a new pointerdown forcibly tear down a stuck previous session
@@ -40,6 +42,10 @@ export function renderEditor(root, nav, workoutId) {
   nameInput.value = workout.name;
 
   root.querySelector(".back-btn").addEventListener("click", () => nav.toHome());
+  root.querySelector(".export-btn").addEventListener("click", async () => {
+    const data = exportWorkoutData(workout);
+    await shareOrDownload(filenameFor(workout.name), JSON.stringify(data, null, 2), workout.name || "Workout");
+  });
   root.querySelector("#add-interval-btn").addEventListener("click", () => openAddChoice(workout.intervals));
   root.querySelector(".save-workout-btn").addEventListener("click", () => {
     workout.name = nameInput.value.trim() || "Untitled workout";
