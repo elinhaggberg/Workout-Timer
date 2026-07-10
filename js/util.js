@@ -21,7 +21,11 @@ export function flattenNodes(nodes) {
   const flat = [];
   for (const node of nodes) {
     if (isSet(node)) {
-      for (let r = 0; r < node.rounds; r++) flat.push(...node.intervals);
+      for (let r = 0; r < node.rounds; r++) {
+        for (const interval of node.intervals) {
+          flat.push({ ...interval, setName: node.name || "Set", setRound: r + 1, setTotalRounds: node.rounds });
+        }
+      }
     } else {
       flat.push(node);
     }
