@@ -1,5 +1,5 @@
 import { getWorkout } from "../storage.js";
-import { formatClock } from "../util.js";
+import { formatClock, flattenNodes } from "../util.js";
 import * as audio from "../audio.js";
 import { setWakeLockWanted } from "../wakelock.js";
 
@@ -8,7 +8,8 @@ const WARNING_SECONDS = 3;
 
 export function renderPlayer(root, nav, workoutId) {
   const workout = getWorkout(workoutId);
-  if (!workout || workout.intervals.length === 0) {
+  const sequence = workout ? flattenNodes(workout.intervals) : [];
+  if (!workout || sequence.length === 0) {
     nav.toHome();
     return;
   }
@@ -113,7 +114,7 @@ export function renderPlayer(root, nav, workoutId) {
   }
 
   function currentInterval() {
-    return workout.intervals[state.index];
+    return sequence[state.index];
   }
 
   function goNext() {
@@ -133,7 +134,7 @@ export function renderPlayer(root, nav, workoutId) {
   }
 
   function advance() {
-    if (state.index >= workout.intervals.length - 1) {
+    if (state.index >= sequence.length - 1) {
       finish();
     } else {
       enterInterval(state.index + 1);
@@ -149,7 +150,7 @@ export function renderPlayer(root, nav, workoutId) {
       workoutName: workout.name,
       completedAt: Date.now(),
       totalSeconds: state.totalElapsed,
-      intervals: workout.intervals.map((i) => ({ name: i.name, type: i.type, amount: i.amount })),
+      intervals: sequence.map((i) => ({ name: i.name, type: i.type, amount: i.amount })),
     });
   }
 
@@ -161,7 +162,7 @@ export function renderPlayer(root, nav, workoutId) {
 
   function render() {
     totalTimerEl.textContent = formatClock(state.totalElapsed);
-    intervalCountEl.textContent = `${state.index + 1} / ${workout.intervals.length}`;
+    intervalCountEl.textContent = `${state.index + 1} / ${sequence.length}`;
     playPauseBtn.textContent = state.running ? "⏸" : "▶";
 
     const interval = currentInterval();

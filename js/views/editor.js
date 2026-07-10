@@ -6,9 +6,10 @@ import {
   upsertDrawerByName,
   updateDrawerInterval,
   makeIntervalInstance,
+  makeSetContainer,
   uid,
 } from "../storage.js";
-import { intervalMeta } from "../util.js";
+import { intervalMeta, isSet, setMeta } from "../util.js";
 
 function openSheet(templateId) {
   const tpl = document.getElementById(templateId);
@@ -26,6 +27,10 @@ function openSheet(templateId) {
   return { el: backdrop, close };
 }
 
+const HOLD_MS = 300;
+const MOVE_CANCEL_PX = 8;
+const DRAG_IGNORE_SELECTOR = ".card-actions, .rounds-stepper, .add-to-set-btn, .set-intervals";
+
 export function renderEditor(root, nav, workoutId) {
   const workout = workoutId ? structuredClone(getWorkout(workoutId)) : createEmptyWorkout();
   if (!workout) {
@@ -40,7 +45,7 @@ export function renderEditor(root, nav, workoutId) {
   nameInput.value = workout.name;
 
   root.querySelector(".back-btn").addEventListener("click", () => nav.toHome());
-  root.querySelector("#add-interval-btn").addEventListener("click", openPicker);
+  root.querySelector("#add-interval-btn").addEventListener("click", () => openAddChoice(workout.intervals));
   root.querySelector(".save-workout-btn").addEventListener("click", () => {
     workout.name = nameInput.value.trim() || "Untitled workout";
     saveWorkout(workout);
@@ -49,52 +54,120 @@ export function renderEditor(root, nav, workoutId) {
 
   renderIntervalList();
 
+  function resortArray(arr, newOrderIds) {
+    arr.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
+  }
+
   function renderIntervalList() {
     const listEl = root.querySelector("#interval-list");
     if (workout.intervals.length === 0) {
       const empty = document.createElement("p");
       empty.className = "empty-state";
-      empty.textContent = "Tap + to add your first interval.";
+      empty.textContent = "Tap + to add your first interval or set.";
       listEl.replaceChildren(empty);
       return;
     }
-    const cardTpl = document.getElementById("tpl-interval-card");
-    const nodes = workout.intervals.map((interval) => {
-      const node = cardTpl.content.cloneNode(true);
-      const card = node.querySelector(".interval-card");
-      card.dataset.id = interval.id;
-      node.querySelector(".card-title").textContent = interval.name;
-      node.querySelector(".card-meta").textContent = intervalMeta(interval);
-      node.querySelector(".duplicate-btn").addEventListener("click", () => {
-        const copyIdx = workout.intervals.indexOf(interval);
-        const copy = { ...interval, id: uid() };
-        workout.intervals.splice(copyIdx + 1, 0, copy);
-        renderIntervalList();
-      });
-      node.querySelector(".edit-btn").addEventListener("click", () => openIntervalForm({ mode: "edit", interval }));
-      node.querySelector(".remove-btn").addEventListener("click", () => {
-        workout.intervals = workout.intervals.filter((i) => i.id !== interval.id);
-        renderIntervalList();
-      });
-      enableDragReorder(card);
-      return node;
-    });
-    listEl.replaceChildren(...nodes);
+    const cards = workout.intervals.map((node) => (isSet(node) ? createSetCardEl(node) : createTopLevelIntervalEl(node)));
+    listEl.replaceChildren(...cards);
+    cards.forEach((card) => enableDragReorder(card, listEl, (order) => resortArray(workout.intervals, order)));
   }
 
-  const HOLD_MS = 300;
-  const MOVE_CANCEL_PX = 8;
+  function createTopLevelIntervalEl(interval) {
+    return createIntervalCardEl(interval, {
+      onEdit: () => openIntervalForm({ mode: "edit", interval }),
+      onDuplicate: () => {
+        const idx = workout.intervals.indexOf(interval);
+        workout.intervals.splice(idx + 1, 0, { ...interval, id: uid() });
+        renderIntervalList();
+      },
+      onRemove: () => {
+        workout.intervals = workout.intervals.filter((n) => n.id !== interval.id);
+        renderIntervalList();
+      },
+    });
+  }
 
-  function enableDragReorder(card) {
+  function createIntervalCardEl(interval, { onEdit, onDuplicate, onRemove }) {
+    const frag = document.getElementById("tpl-interval-card").content.cloneNode(true);
+    const card = frag.querySelector(".interval-card");
+    card.dataset.id = interval.id;
+    frag.querySelector(".card-title").textContent = interval.name;
+    frag.querySelector(".card-meta").textContent = intervalMeta(interval);
+    frag.querySelector(".duplicate-btn").addEventListener("click", onDuplicate);
+    frag.querySelector(".edit-btn").addEventListener("click", onEdit);
+    frag.querySelector(".remove-btn").addEventListener("click", onRemove);
+    return card;
+  }
+
+  function createSetCardEl(setNode) {
+    const frag = document.getElementById("tpl-set-card").content.cloneNode(true);
+    const card = frag.querySelector(".set-card");
+    card.dataset.id = setNode.id;
+    frag.querySelector(".card-meta").textContent = setMeta(setNode);
+    frag.querySelector(".rounds-value").textContent = setNode.rounds;
+
+    frag.querySelector(".rounds-dec").addEventListener("click", () => {
+      setNode.rounds = Math.max(1, setNode.rounds - 1);
+      renderIntervalList();
+    });
+    frag.querySelector(".rounds-inc").addEventListener("click", () => {
+      setNode.rounds = Math.min(50, setNode.rounds + 1);
+      renderIntervalList();
+    });
+    frag.querySelector(".duplicate-btn").addEventListener("click", () => {
+      const idx = workout.intervals.indexOf(setNode);
+      const copy = { ...setNode, id: uid(), intervals: setNode.intervals.map((i) => ({ ...i, id: uid() })) };
+      workout.intervals.splice(idx + 1, 0, copy);
+      renderIntervalList();
+    });
+    frag.querySelector(".remove-btn").addEventListener("click", () => {
+      workout.intervals = workout.intervals.filter((n) => n.id !== setNode.id);
+      renderIntervalList();
+    });
+
+    const nestedListEl = frag.querySelector(".set-intervals");
+    if (setNode.intervals.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "empty-state";
+      empty.textContent = "No intervals in this set yet.";
+      nestedListEl.appendChild(empty);
+    } else {
+      const nestedCards = setNode.intervals.map((interval) =>
+        createIntervalCardEl(interval, {
+          onEdit: () => openIntervalForm({ mode: "edit", interval }),
+          onDuplicate: () => {
+            const idx = setNode.intervals.indexOf(interval);
+            setNode.intervals.splice(idx + 1, 0, { ...interval, id: uid() });
+            renderIntervalList();
+          },
+          onRemove: () => {
+            setNode.intervals = setNode.intervals.filter((i) => i.id !== interval.id);
+            renderIntervalList();
+          },
+        })
+      );
+      nestedListEl.replaceChildren(...nestedCards);
+      nestedCards.forEach((nestedCard) =>
+        enableDragReorder(nestedCard, nestedListEl, (order) => resortArray(setNode.intervals, order))
+      );
+    }
+
+    frag.querySelector(".add-to-set-btn").addEventListener("click", () => openPicker(setNode.intervals));
+
+    return card;
+  }
+
+  function enableDragReorder(card, listEl, onReorder) {
     card.addEventListener("pointerdown", (e) => {
-      if (e.target.closest(".card-actions")) return;
+      if (e.target.closest(DRAG_IGNORE_SELECTOR)) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
+      e.preventDefault();
 
       const startX = e.clientX;
       const startY = e.clientY;
       let holdTimer = setTimeout(() => {
         cleanup();
-        beginDrag(e, card);
+        beginDrag(e, card, listEl, onReorder);
       }, HOLD_MS);
 
       function onEarlyMove(ev) {
@@ -114,8 +187,7 @@ export function renderEditor(root, nav, workoutId) {
     });
   }
 
-  function beginDrag(e, card) {
-    const listEl = root.querySelector("#interval-list");
+  function beginDrag(e, card, listEl, onReorder) {
     const rect = card.getBoundingClientRect();
 
     if (navigator.vibrate) navigator.vibrate(12);
@@ -139,12 +211,15 @@ export function renderEditor(root, nav, workoutId) {
       const dy = ev.clientY - startY;
       card.style.top = rect.top + dy + "px";
 
-      const cardMidY = rect.top + dy + rect.height / 2;
+      // Use the pointer position itself (not the dragged card's midpoint) so
+      // cards much taller or shorter than their siblings (e.g. Set containers)
+      // still land wherever the finger/cursor actually is.
+      const pointerY = ev.clientY;
       const siblings = [...listEl.children].filter((c) => c !== placeholder);
       let target = null;
       for (const sib of siblings) {
         const sRect = sib.getBoundingClientRect();
-        if (cardMidY < sRect.top + sRect.height / 2) {
+        if (pointerY < sRect.top + sRect.height / 2) {
           target = sib;
           break;
         }
@@ -166,8 +241,8 @@ export function renderEditor(root, nav, workoutId) {
       card.style.width = "";
       placeholder.replaceWith(card);
 
-      const newOrder = [...listEl.querySelectorAll(".interval-card")].map((el) => el.dataset.id);
-      workout.intervals.sort((a, b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
+      const newOrder = [...listEl.children].map((el) => el.dataset.id);
+      onReorder(newOrder);
     }
 
     document.addEventListener("pointermove", onMove);
@@ -175,7 +250,21 @@ export function renderEditor(root, nav, workoutId) {
     document.addEventListener("pointercancel", onUp);
   }
 
-  function openPicker() {
+  function openAddChoice(targetArray) {
+    const sheet = openSheet("tpl-add-choice");
+    sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+    sheet.el.querySelector("#choice-interval").addEventListener("click", () => {
+      sheet.close();
+      openPicker(targetArray);
+    });
+    sheet.el.querySelector("#choice-set").addEventListener("click", () => {
+      sheet.close();
+      targetArray.push(makeSetContainer());
+      renderIntervalList();
+    });
+  }
+
+  function openPicker(targetArray) {
     const sheet = openSheet("tpl-interval-picker");
     const drawer = getDrawer();
     const listEl = sheet.el.querySelector("#drawer-list");
@@ -200,7 +289,7 @@ export function renderEditor(root, nav, workoutId) {
               amount: entry.amount,
               drawerId: entry.id,
             });
-            workout.intervals.push(instance);
+            targetArray.push(instance);
             sheet.close();
             renderIntervalList();
           });
@@ -212,11 +301,11 @@ export function renderEditor(root, nav, workoutId) {
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
     sheet.el.querySelector(".new-interval-btn").addEventListener("click", () => {
       sheet.close();
-      openIntervalForm({ mode: "create" });
+      openIntervalForm({ mode: "create", targetArray });
     });
   }
 
-  function openIntervalForm({ mode, interval = null }) {
+  function openIntervalForm({ mode, interval = null, targetArray = null }) {
     const sheet = openSheet("tpl-interval-form");
     const form = sheet.el.querySelector("#interval-form");
     const titleEl = sheet.el.querySelector(".form-title");
@@ -270,7 +359,7 @@ export function renderEditor(root, nav, workoutId) {
       } else {
         const drawerEntry = upsertDrawerByName(values);
         const instance = makeIntervalInstance({ ...values, drawerId: drawerEntry.id });
-        workout.intervals.push(instance);
+        targetArray.push(instance);
         renderIntervalList();
       }
       sheet.close();
