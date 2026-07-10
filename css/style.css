@@ -132,14 +132,14 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 }
 .card-actions { display: flex; gap: 2px; flex-shrink: 0; }
 
-.interval-card {
+.interval-card, .set-card {
   touch-action: pan-y;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
 }
-.interval-card.dragging {
+.interval-card.dragging, .set-card.dragging {
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5);
   opacity: 0.95;
   cursor: grabbing;
@@ -149,6 +149,68 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
   border: 1px dashed var(--border);
   border-radius: var(--radius);
 }
+
+.set-card {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 14px;
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+.set-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rounds-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 2px;
+  flex-shrink: 0;
+}
+.rounds-stepper .icon-btn { width: 30px; height: 30px; font-size: 1rem; }
+.rounds-value {
+  min-width: 22px;
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.set-intervals {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+}
+.set-intervals .interval-card {
+  background: var(--surface-2);
+  padding: 10px 12px;
+}
+.add-to-set-btn {
+  align-self: flex-start;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 2px 4px;
+}
+
+.choice-btn {
+  width: 100%;
+  text-align: left;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.choice-title { font-weight: 700; font-size: 1rem; }
+.choice-sub { font-size: 0.82rem; color: var(--text-dim); }
 
 .play-btn { color: var(--accent); }
 .delete-btn:active, .remove-btn:active { color: var(--danger); }

@@ -62,6 +62,45 @@
     </article>
   </template>
 
+  <template id="tpl-set-card">
+    <article class="card set-card">
+      <div class="set-header">
+        <div class="card-main">
+          <h3 class="card-title">Set</h3>
+          <p class="card-meta"></p>
+        </div>
+        <div class="rounds-stepper">
+          <button type="button" class="icon-btn rounds-dec" aria-label="Fewer rounds">–</button>
+          <span class="rounds-value">2</span>
+          <button type="button" class="icon-btn rounds-inc" aria-label="More rounds">+</button>
+        </div>
+        <div class="card-actions">
+          <button class="icon-btn duplicate-btn" aria-label="Duplicate set" title="Duplicate">⧉</button>
+          <button class="icon-btn remove-btn" aria-label="Remove set" title="Remove">✕</button>
+        </div>
+      </div>
+      <div class="set-intervals"></div>
+      <button type="button" class="text-btn add-to-set-btn">+ Add interval to set</button>
+    </article>
+  </template>
+
+  <template id="tpl-add-choice">
+    <div class="sheet">
+      <header class="sheet-header">
+        <h2>Add to workout</h2>
+        <button class="icon-btn close-btn" aria-label="Close">✕</button>
+      </header>
+      <button type="button" class="choice-btn" id="choice-interval">
+        <span class="choice-title">Interval</span>
+        <span class="choice-sub">A single timed or rep-based exercise</span>
+      </button>
+      <button type="button" class="choice-btn" id="choice-set">
+        <span class="choice-title">Set</span>
+        <span class="choice-sub">A group of intervals that repeats for several rounds</span>
+      </button>
+    </div>
+  </template>
+
   <template id="tpl-interval-picker">
     <div class="sheet">
       <header class="sheet-header">

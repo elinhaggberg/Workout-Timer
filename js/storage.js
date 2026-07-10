@@ -87,4 +87,8 @@ export function makeIntervalInstance({ name, type, amount, drawerId = null }) {
   return { id: uid(), name: name.trim(), type, amount, drawerId };
 }
 
+export function makeSetContainer({ rounds = 2 } = {}) {
+  return { id: uid(), kind: "set", rounds, intervals: [] };
+}
+
 export { uid };
