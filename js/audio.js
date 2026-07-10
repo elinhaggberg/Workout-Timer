@@ -1,5 +1,13 @@
-let ctx = null;
+// Tones are synthesized as short WAV clips and played through real <audio>
+// elements rather than raw Web Audio oscillators. iOS's Web Audio API is
+// notoriously unreliable in standalone (Home Screen installed) web apps —
+// silent even with the ringer and volume on — because it uses a flaky
+// "ambient" audio session category there. HTMLAudioElement playback goes
+// through iOS's ordinary media pipeline instead, which is reliable in that
+// same standalone context.
+
 let enabled = false;
+const urlCache = new Map();
 
 export function setEnabled(value) {
   enabled = value;
@@ -9,53 +17,97 @@ export function isEnabled() {
   return enabled;
 }
 
-function getCtx() {
-  if (!ctx) {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    ctx = new AC();
+function renderToneWav(freq, duration, { type = "sine", volume = 0.35 } = {}) {
+  const sampleRate = 44100;
+  const numSamples = Math.max(1, Math.floor(duration * sampleRate));
+  const samples = new Float32Array(numSamples);
+  const attackSamples = sampleRate * 0.005;
+
+  for (let i = 0; i < numSamples; i++) {
+    const t = i / sampleRate;
+    const phase = 2 * Math.PI * freq * t;
+    const wave = type === "square" ? Math.sign(Math.sin(phase)) : Math.sin(phase);
+    const attack = Math.min(1, i / attackSamples);
+    const decay = Math.exp((-3 * i) / numSamples);
+    samples[i] = wave * volume * attack * decay;
   }
-  if (ctx.state === "suspended") ctx.resume();
-  return ctx;
+
+  return encodeWavPCM16(samples, sampleRate);
+}
+
+function encodeWavPCM16(samples, sampleRate) {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  function writeString(offset, str) {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+  }
+
+  writeString(0, "RIFF");
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeString(8, "WAVE");
+  writeString(12, "fmt ");
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM
+  view.setUint16(22, 1, true); // mono
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
+  writeString(36, "data");
+  view.setUint32(40, samples.length * 2, true);
+
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++, offset += 2) {
+    const s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+  }
+
+  return new Blob([buffer], { type: "audio/wav" });
+}
+
+function toneUrl(key, factory) {
+  if (!urlCache.has(key)) {
+    urlCache.set(key, URL.createObjectURL(factory()));
+  }
+  return urlCache.get(key);
+}
+
+function play(url) {
+  const el = new Audio(url);
+  el.play().catch(() => {});
+}
+
+function tone(key, freq, duration, options) {
+  if (!enabled) return;
+  play(toneUrl(key, () => renderToneWav(freq, duration, options)));
 }
 
 // Call from a user gesture (e.g. tapping play) to unlock audio on iOS/Safari.
 export function unlockAudio() {
-  getCtx();
-}
-
-function tone(freq, startOffset, duration, { type = "sine", volume = 0.35 } = {}) {
-  if (!enabled) return;
-  const c = getCtx();
-  const osc = c.createOscillator();
-  const gain = c.createGain();
-  osc.type = type;
-  osc.frequency.value = freq;
-  const t0 = c.currentTime + startOffset;
-  gain.gain.setValueAtTime(0, t0);
-  gain.gain.linearRampToValueAtTime(volume, t0 + 0.01);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
-  osc.connect(gain).connect(c.destination);
-  osc.start(t0);
-  osc.stop(t0 + duration + 0.02);
+  play(toneUrl("unlock", () => renderToneWav(440, 0.05, { volume: 0 })));
 }
 
 // Short low blip used during the 3-2-1 countdown.
 export function countdownTick() {
-  tone(880, 0, 0.12, { type: "square", volume: 0.3 });
+  tone("countdownTick", 880, 0.12, { type: "square", volume: 0.3 });
 }
 
 // Higher double-beep marking the start of a work interval ("go").
 export function intervalStart() {
-  tone(1320, 0, 0.18, { type: "square", volume: 0.4 });
+  tone("intervalStart", 1320, 0.18, { type: "square", volume: 0.4 });
 }
 
 // Soft single tone marking rest/reps-complete transitions.
 export function intervalEnd() {
-  tone(660, 0, 0.15, { type: "sine", volume: 0.3 });
+  tone("intervalEnd", 660, 0.15, { type: "sine", volume: 0.3 });
 }
 
 // Cheerful ascending run played once the whole workout is complete.
 export function workoutComplete() {
+  if (!enabled) return;
   const notes = [523.25, 659.25, 783.99, 1046.5];
-  notes.forEach((freq, i) => tone(freq, i * 0.14, 0.28, { type: "sine", volume: 0.35 }));
+  notes.forEach((freq, i) => {
+    setTimeout(() => tone(`chord-${freq}`, freq, 0.28, { type: "sine", volume: 0.35 }), i * 140);
+  });
 }

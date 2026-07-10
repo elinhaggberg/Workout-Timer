@@ -100,11 +100,20 @@ export function renderEditor(root, nav, workoutId) {
           )
     );
     listEl.replaceChildren(...cards);
+    // Textareas can only measure their own scrollHeight once actually attached
+    // to the document, so the initial auto-grow pass happens here rather than
+    // at creation time.
+    listEl.querySelectorAll(".set-name-input").forEach((el) => autoResizeTextarea(el));
 
     if (scrollToId) {
       const target = listEl.querySelector(`[data-id="${scrollToId}"]`);
       if (target) target.scrollIntoView({ behavior: "smooth", block: "end" });
     }
+  }
+
+  function autoResizeTextarea(el) {
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
   }
 
   function createIntervalCardEl(interval, { onEdit, onDuplicate, onRemove }, listEl, onReorder) {
@@ -133,6 +142,14 @@ export function renderEditor(root, nav, workoutId) {
     nameInput.value = setNode.name || "";
     nameInput.addEventListener("input", () => {
       setNode.name = nameInput.value;
+      autoResizeTextarea(nameInput);
+    });
+    // Keep it a single wrapping label rather than a multi-paragraph note.
+    nameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        nameInput.blur();
+      }
     });
 
     frag.querySelector(".rounds-dec").addEventListener("click", () => {
