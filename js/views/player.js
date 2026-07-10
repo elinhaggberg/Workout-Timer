@@ -22,6 +22,7 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
   const totalTimerEl = root.querySelector("#total-timer");
   const intervalCountEl = root.querySelector("#interval-count");
   const intervalNameEl = root.querySelector("#interval-name");
+  const setContextEl = root.querySelector("#set-context");
   const bigNumberEl = root.querySelector("#big-number");
   const bigLabelEl = root.querySelector("#big-label");
   const countdownRingEl = root.querySelector("#countdown-ring");
@@ -188,6 +189,12 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
 
     const interval = currentInterval();
     intervalNameEl.textContent = interval.name;
+    if (interval.setName) {
+      setContextEl.textContent = `${interval.setName} · Round ${interval.setRound}/${interval.setTotalRounds}`;
+      setContextEl.classList.remove("hidden");
+    } else {
+      setContextEl.classList.add("hidden");
+    }
 
     if (!state.started && state.phase === "countdown") {
       countdownRingEl.classList.add("hidden");

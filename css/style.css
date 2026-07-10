@@ -508,6 +508,14 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   padding: 20px;
   gap: 24px;
 }
+.set-context {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 -14px;
+}
 .interval-name {
   font-size: 1.6rem;
   font-weight: 700;
