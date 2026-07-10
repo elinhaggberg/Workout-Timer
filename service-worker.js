@@ -7,6 +7,7 @@ const APP_SHELL = [
   "./js/app.js",
   "./js/storage.js",
   "./js/audio.js",
+  "./js/icons.js",
   "./js/util.js",
   "./js/wakelock.js",
   "./js/confetti.js",

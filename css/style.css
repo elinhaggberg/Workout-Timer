@@ -77,6 +77,20 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 }
 .workout-name-input:focus { outline: none; border-color: var(--accent); }
 
+.icon {
+  width: 1em;
+  height: 1em;
+  display: block;
+  fill: currentColor;
+}
+.trophy-icon {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  vertical-align: -0.1em;
+  color: var(--accent);
+}
+
 .icon-btn {
   width: 40px;
   height: 40px;

@@ -2,6 +2,7 @@ import { getWorkout, getSoundEnabled, setSoundEnabled } from "../storage.js";
 import { formatClock, flattenNodes } from "../util.js";
 import * as audio from "../audio.js";
 import { setWakeLockWanted } from "../wakelock.js";
+import { ICON_PLAY, ICON_PAUSE, ICON_VOLUME_HIGH, ICON_VOLUME_XMARK } from "../icons.js";
 
 const LEAD_IN_SECONDS = 3;
 const WARNING_SECONDS = 3;
@@ -75,7 +76,7 @@ export function renderPlayer(root, nav, workoutId) {
 
   function renderSoundToggle() {
     const on = audio.isEnabled();
-    soundToggleBtn.textContent = on ? "🔊" : "🔇";
+    soundToggleBtn.innerHTML = on ? ICON_VOLUME_HIGH : ICON_VOLUME_XMARK;
     soundToggleBtn.classList.toggle("active", on);
     soundToggleBtn.setAttribute("aria-label", on ? "Mute sound" : "Unmute sound");
   }
@@ -183,7 +184,7 @@ export function renderPlayer(root, nav, workoutId) {
   function render() {
     totalTimerEl.textContent = formatClock(state.totalElapsed);
     intervalCountEl.textContent = `${state.index + 1} / ${sequence.length}`;
-    playPauseBtn.textContent = state.running ? "⏸" : "▶";
+    playPauseBtn.innerHTML = state.running ? ICON_PAUSE : ICON_PLAY;
 
     const interval = currentInterval();
     intervalNameEl.textContent = interval.name;
