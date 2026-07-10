@@ -319,10 +319,27 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 .delete-btn:active, .remove-btn:active { color: var(--danger); }
 
 /* Bigger tap targets for the home screen's workout cards specifically. */
-.workout-card { padding: 26px 24px; }
-.workout-card .card-title { font-size: 1.2rem; }
+.workout-card {
+  padding: 26px 24px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+.workout-card .card-title {
+  font-size: 1.2rem;
+  width: 100%;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+.workout-card-footer { display: flex; align-items: center; gap: 10px; }
+.workout-card-footer .card-meta { flex: 1; min-width: 0; margin: 0; }
 .workout-card .icon-btn { width: 48px; height: 48px; font-size: 1.3rem; }
-.workout-card .card-actions { gap: 6px; }
+.workout-card .card-actions { gap: 6px; flex-shrink: 0; }
 
 /* Playful theme: tint every card a low-opacity shade of the chosen accent
    instead of the flat neutral surface color, so re-picking an accent swatch
