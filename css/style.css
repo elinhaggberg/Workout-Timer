@@ -315,6 +315,17 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   box-shadow: 0 6px 20px rgba(212, 255, 61, 0.25);
 }
 .fab:active { transform: scale(0.95); }
+
+.fab-secondary {
+  bottom: calc(28px + 56px + 14px + env(safe-area-inset-bottom));
+  width: 52px;
+  height: 52px;
+  font-size: 1.4rem;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--border);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
 @media (max-width: 560px) {
   .fab { right: 24px; }
 }

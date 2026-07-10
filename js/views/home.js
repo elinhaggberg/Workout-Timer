@@ -1,4 +1,4 @@
-import { getWorkouts, getWorkout, deleteWorkout } from "../storage.js";
+import { getWorkouts, getWorkout, deleteWorkout, makeSetContainer, makeIntervalInstance, uid } from "../storage.js";
 import { workoutMeta, intervalMeta, setMeta, isSet } from "../util.js";
 import { unlockAudio } from "../audio.js";
 import { openSheet } from "../sheet.js";
@@ -10,6 +10,7 @@ export function renderHome(root, nav) {
   document.getElementById("add-workout-btn").addEventListener("click", () => {
     nav.toEditor(null);
   });
+  document.getElementById("tabata-btn").addEventListener("click", openTabataSetup);
 
   renderList();
 
@@ -58,6 +59,35 @@ export function renderHome(root, nav) {
     // (rather than waiting for a separate tap there).
     unlockAudio();
     nav.toPlayer(workoutId);
+  }
+
+  function openTabataSetup() {
+    const sheet = openSheet("tpl-tabata-setup");
+    const form = sheet.el.querySelector("#tabata-form");
+
+    sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const work = Math.max(1, Number(form.work.value) || 20);
+      const rest = Math.max(0, Number(form.rest.value) || 0);
+      const rounds = Math.max(1, Number(form.rounds.value) || 1);
+
+      const set = makeSetContainer({ rounds });
+      set.intervals.push(makeIntervalInstance({ name: "Work", type: "timer", amount: work }));
+      if (rest > 0) set.intervals.push(makeIntervalInstance({ name: "Rest", type: "timer", amount: rest }));
+
+      const workout = {
+        id: uid(),
+        name: `Tabata ${work}s/${rest}s × ${rounds}`,
+        createdAt: Date.now(),
+        intervals: [set],
+      };
+
+      unlockAudio();
+      sheet.close();
+      nav.toPlayerAdhoc(workout);
+    });
   }
 
   function confirmDeleteWorkout(w) {
