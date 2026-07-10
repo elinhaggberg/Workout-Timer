@@ -101,9 +101,35 @@ function tone(key, freq, duration, options) {
   play(key, () => renderToneWav(freq, duration, options));
 }
 
+function primeTone(key, freq, duration, options) {
+  const el = getAudioElement(key, () => renderToneWav(freq, duration, options));
+  const restoreVolume = el.volume;
+  el.volume = 0;
+  el.currentTime = 0;
+  el.play()
+    .then(() => {
+      el.pause();
+      el.currentTime = 0;
+      el.volume = restoreVolume;
+    })
+    .catch(() => {
+      el.volume = restoreVolume;
+    });
+}
+
 // Call from a user gesture (e.g. tapping play) to unlock audio on iOS/Safari.
+// Also primes every tone that gets re-triggered multiple times in quick
+// succession (e.g. the three end-of-interval warning beeps, one per second):
+// on iOS a freshly created <audio> element that's never been played yet can
+// silently drop a play() call if it's re-triggered again before its first
+// play has fully loaded/decoded ("interrupted by a new load request").
+// Playing each one once, muted, well before it's ever needed for real forces
+// it to fully load so later rapid-fire plays start instantly and reliably.
 export function unlockAudio() {
   play("unlock", () => renderToneWav(440, 0.05, { volume: 0 }));
+  primeTone("countdownTick", 880, 0.12, { type: "square", volume: 0.3 });
+  primeTone("intervalStart", 1320, 0.18, { type: "square", volume: 0.4 });
+  primeTone("intervalEnd", 660, 0.15, { type: "sine", volume: 0.3 });
 }
 
 // Short low blip used during the 3-2-1 countdown.
