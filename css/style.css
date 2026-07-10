@@ -5,12 +5,42 @@
   --border: #2a2f36;
   --text: #f2f3f5;
   --text-dim: #8a919c;
-  --accent: #d4ff3d;
-  --accent-text: #0b0d0f;
+  --accent: #b9a6ff;
+  --accent-text: #1c1330;
   --danger: #ff5d5d;
+  --font-heading: inherit;
   --radius: 14px;
   --gap: 14px;
   font-size: 16px;
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #edeff2;
+  --border: #dde1e7;
+  --text: #16181c;
+  --text-dim: #6b7280;
+  --accent: #3e7bd9;
+  --accent-text: #ffffff;
+  --danger: #d9433f;
+}
+
+/* --accent/--accent-text are overridden inline via theme.js for the user's
+   chosen swatch; these are just the default (Lipstick) shown before that
+   runs, or if no swatch has been picked yet. */
+:root[data-theme="playful"] {
+  --bg: #f5eedc;
+  --surface: #fffcf4;
+  --surface-2: #efe6d0;
+  --border: #e3d7b8;
+  --text: #241c1c;
+  --text-dim: #8a7f6d;
+  --accent: #ee4c9b;
+  --accent-text: #ffffff;
+  --danger: #e0454a;
+  --font-heading: ui-serif, Georgia, "Times New Roman", serif;
+  --radius: 22px;
 }
 
 * { box-sizing: border-box; }
@@ -54,7 +84,8 @@ button {
   cursor: pointer;
 }
 
-h1, h2, h3 { margin: 0; font-weight: 600; }
+h1, h2, h3 { margin: 0; font-weight: 600; font-family: var(--font-heading); }
+.interval-name, .choice-title, .workout-name-input { font-family: var(--font-heading); }
 
 /* Topbar */
 .topbar {
@@ -64,6 +95,8 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
   padding: 18px 16px 10px;
 }
 .topbar h1 { font-size: 1.4rem; flex: 1; }
+.home-topbar { padding: 28px 16px 22px; }
+.home-topbar h1 { font-size: 2rem; }
 
 .workout-name-input {
   flex: 1;
@@ -286,8 +319,19 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 .delete-btn:active, .remove-btn:active { color: var(--danger); }
 
 /* Bigger tap targets for the home screen's workout cards specifically. */
+.workout-card { padding: 26px 24px; }
+.workout-card .card-title { font-size: 1.2rem; }
 .workout-card .icon-btn { width: 48px; height: 48px; font-size: 1.3rem; }
 .workout-card .card-actions { gap: 6px; }
+
+/* Playful theme: tint every card a low-opacity shade of the chosen accent
+   instead of the flat neutral surface color, so re-picking an accent swatch
+   re-colors the whole app, not just buttons. The border is a darker shade
+   of the page background instead, for a softer outline than the accent. */
+:root[data-theme="playful"] .card {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--bg) 85%, black);
+}
 
 .drawer-item {
   width: 100%;
@@ -312,7 +356,7 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(212, 255, 61, 0.25);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 .fab:active { transform: scale(0.95); }
 
@@ -424,6 +468,53 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 }
 .menu-item:last-child { border-bottom: none; }
 .menu-item .icon { width: 1.1em; height: 1.1em; color: var(--text-dim); flex-shrink: 0; }
+
+/* Theme picker */
+.theme-option-list {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0 20px;
+}
+.theme-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+.theme-option.active { border-color: var(--accent); color: var(--text); }
+.theme-swatch-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+}
+.theme-swatch-preview.dark { background: #b9a6ff; }
+.theme-swatch-preview.light { background: #3e7bd9; }
+.theme-swatch-preview.playful { background: #ee4c9b; }
+
+.playful-accent-picker { padding-bottom: 8px; }
+.playful-accent-label { color: var(--text-dim); font-size: 0.85rem; margin: 0 0 10px; }
+.swatch-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.swatch-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  position: relative;
+}
+.swatch-btn.active { border-color: var(--text); }
+.swatch-btn[data-accent="lipstick"] { background: #ee4c9b; }
+.swatch-btn[data-accent="grapefruit"] { background: #f2542d; }
+.swatch-btn[data-accent="sunshine"] { background: #f5b942; }
+.swatch-btn[data-accent="lilac"] { background: #b9a6ff; }
+.swatch-btn[data-accent="midnight"] { background: #3b2352; }
 
 /* Import */
 .import-hint { color: var(--text-dim); font-size: 0.88rem; margin: 4px 0 14px; }
@@ -633,3 +724,38 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   line-height: 1.5;
 }
 .summary-box strong { color: var(--text); }
+
+/* Playful theme: rounder, friendlier shapes across the board (--radius
+   itself is already bumped up top for .card/.drag-placeholder). */
+:root[data-theme="playful"] .icon-btn,
+:root[data-theme="playful"] .text-btn,
+:root[data-theme="playful"] .rounds-stepper,
+:root[data-theme="playful"] .field input[type="text"],
+:root[data-theme="playful"] .field input[type="number"],
+:root[data-theme="playful"] .segmented {
+  border-radius: 14px;
+}
+:root[data-theme="playful"] .choice-btn { border-radius: 18px; }
+:root[data-theme="playful"] .segmented-option { border-radius: 12px; }
+:root[data-theme="playful"] .sheet { border-radius: 28px 28px 0 0; }
+:root[data-theme="playful"] .play-preview-btn { border-radius: 24px; }
+:root[data-theme="playful"] .theme-option { border-radius: 18px; }
+:root[data-theme="playful"] .finish-card { border-radius: 28px; }
+:root[data-theme="playful"] .summary-box { border-radius: 16px; }
+
+/* Playful theme: bouncier, more energetic press feedback than the flat
+   opacity/scale used elsewhere, via a back-out easing with slight overshoot. */
+:root[data-theme="playful"] .fab,
+:root[data-theme="playful"] .round-btn,
+:root[data-theme="playful"] .icon-btn,
+:root[data-theme="playful"] .text-btn,
+:root[data-theme="playful"] .swatch-btn,
+:root[data-theme="playful"] .theme-option,
+:root[data-theme="playful"] .workout-card {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+:root[data-theme="playful"] .icon-btn:active { transform: scale(0.88); }
+:root[data-theme="playful"] .text-btn:active { transform: scale(0.94); }
+:root[data-theme="playful"] .swatch-btn:active { transform: scale(0.85); }
+:root[data-theme="playful"] .theme-option:active { transform: scale(0.96); }
+:root[data-theme="playful"] .workout-card:active { transform: scale(0.985); }

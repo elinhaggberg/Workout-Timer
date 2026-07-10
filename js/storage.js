@@ -1,6 +1,7 @@
 const WORKOUTS_KEY = "wt_workouts_v1";
 const DRAWER_KEY = "wt_interval_drawer_v1";
 const SOUND_KEY = "wt_sound_enabled_v1";
+const THEME_KEY = "wt_theme_v1";
 
 function uid() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -175,6 +176,14 @@ export function getSoundEnabled() {
 
 export function setSoundEnabled(value) {
   localStorage.setItem(SOUND_KEY, value ? "true" : "false");
+}
+
+export function getThemePref() {
+  return readJSON(THEME_KEY, {});
+}
+
+export function setThemePref(pref) {
+  writeJSON(THEME_KEY, pref);
 }
 
 export { uid };

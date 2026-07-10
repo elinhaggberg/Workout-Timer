@@ -2,6 +2,9 @@ import { renderHome } from "./views/home.js";
 import { renderEditor } from "./views/editor.js";
 import { renderPlayer } from "./views/player.js";
 import { renderFinish } from "./views/finish.js";
+import { applyTheme } from "./theme.js";
+
+applyTheme();
 
 const root = document.getElementById("app");
 let pendingFinishSummary = null;

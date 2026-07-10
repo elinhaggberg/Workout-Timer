@@ -1,6 +1,6 @@
 const COLORS = ["#d4ff3d", "#ff5d5d", "#4dd0ff", "#ffb84d", "#c98bff"];
 
-export function launchConfetti(canvas, { durationMs = 2600, count = 140 } = {}) {
+export function launchConfetti(canvas, { durationMs = 2600, count = 140, colors = COLORS } = {}) {
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
   canvas.width = rect.width * dpr;
@@ -15,7 +15,7 @@ export function launchConfetti(canvas, { durationMs = 2600, count = 140 } = {}) 
     x: Math.random() * w,
     y: -20 - Math.random() * h * 0.4,
     size: 4 + Math.random() * 6,
-    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    color: colors[Math.floor(Math.random() * colors.length)],
     vx: (Math.random() - 0.5) * 2,
     vy: 2 + Math.random() * 3,
     rotation: Math.random() * Math.PI * 2,

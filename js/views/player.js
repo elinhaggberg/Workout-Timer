@@ -3,6 +3,7 @@ import { formatClock, flattenNodes } from "../util.js";
 import * as audio from "../audio.js";
 import { setWakeLockWanted } from "../wakelock.js";
 import { ICON_PLAY, ICON_PAUSE, ICON_VOLUME_HIGH, ICON_VOLUME_XMARK } from "../icons.js";
+import { getTheme, PLAYFUL_SWATCHES } from "../theme.js";
 
 const LEAD_IN_SECONDS = 3;
 const WARNING_SECONDS = 3;
@@ -222,6 +223,12 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
       countdownRingEl.classList.remove("hidden");
       const fraction = (LEAD_IN_SECONDS - state.countdownRemaining) / LEAD_IN_SECONDS;
       countdownRingFillEl.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - fraction));
+      if (getTheme().mode === "playful") {
+        const swatch = PLAYFUL_SWATCHES[state.index % PLAYFUL_SWATCHES.length];
+        countdownRingFillEl.style.stroke = swatch.accent;
+      } else {
+        countdownRingFillEl.style.stroke = "";
+      }
       bigLabelEl.textContent = "Get ready";
     } else if (interval.type === "timer") {
       countdownRingEl.classList.add("hidden");
