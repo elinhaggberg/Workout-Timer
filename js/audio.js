@@ -73,19 +73,37 @@ function toneUrl(key, factory) {
   return urlCache.get(key);
 }
 
-function play(url) {
-  const el = new Audio(url);
+// One <audio> element is created per distinct tone and kept forever in this
+// map, rather than a fresh element per play. A freshly created element with
+// no other reference to it can be garbage collected mid-playback once the
+// calling function returns — browsers (mobile Safari especially) don't treat
+// an unreferenced element as "in use" just because it's still playing —
+// which is why only the very first beep of a session reliably played.
+// Reusing one permanently-referenced element per tone sidesteps that
+// entirely: it's never eligible for GC for the life of the page.
+const audioElements = new Map();
+
+function getAudioElement(key, factory) {
+  if (!audioElements.has(key)) {
+    audioElements.set(key, new Audio(toneUrl(key, factory)));
+  }
+  return audioElements.get(key);
+}
+
+function play(key, factory) {
+  const el = getAudioElement(key, factory);
+  el.currentTime = 0;
   el.play().catch(() => {});
 }
 
 function tone(key, freq, duration, options) {
   if (!enabled) return;
-  play(toneUrl(key, () => renderToneWav(freq, duration, options)));
+  play(key, () => renderToneWav(freq, duration, options));
 }
 
 // Call from a user gesture (e.g. tapping play) to unlock audio on iOS/Safari.
 export function unlockAudio() {
-  play(toneUrl("unlock", () => renderToneWav(440, 0.05, { volume: 0 })));
+  play("unlock", () => renderToneWav(440, 0.05, { volume: 0 }));
 }
 
 // Short low blip used during the 3-2-1 countdown.
