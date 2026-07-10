@@ -520,6 +520,23 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   align-items: center;
   gap: 8px;
 }
+.hidden { display: none !important; }
+.countdown-ring { width: 180px; height: 180px; }
+.countdown-ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.countdown-ring-track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 8;
+}
+.countdown-ring-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 339.3;
+  stroke-dashoffset: 339.3;
+  transition: stroke-dashoffset 1s linear;
+}
 .big-number {
   font-variant-numeric: tabular-nums;
   font-size: 6.5rem;

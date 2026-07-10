@@ -6,6 +6,7 @@ import { ICON_PLAY, ICON_PAUSE, ICON_VOLUME_HIGH, ICON_VOLUME_XMARK } from "../i
 
 const LEAD_IN_SECONDS = 3;
 const WARNING_SECONDS = 3;
+const RING_CIRCUMFERENCE = 2 * Math.PI * 54;
 
 export function renderPlayer(root, nav, workoutId, adhocWorkout) {
   const workout = adhocWorkout || getWorkout(workoutId);
@@ -23,6 +24,8 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
   const intervalNameEl = root.querySelector("#interval-name");
   const bigNumberEl = root.querySelector("#big-number");
   const bigLabelEl = root.querySelector("#big-label");
+  const countdownRingEl = root.querySelector("#countdown-ring");
+  const countdownRingFillEl = root.querySelector("#countdown-ring-fill");
   const playPauseBtn = root.querySelector("#play-pause-btn");
   const prevBtn = root.querySelector("#prev-btn");
   const nextBtn = root.querySelector("#next-btn");
@@ -98,9 +101,7 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
 
     if (state.phase === "countdown") {
       state.countdownRemaining -= 1;
-      if (state.countdownRemaining > 0) {
-        audio.countdownTick();
-      } else {
+      if (state.countdownRemaining <= 0) {
         enterActivePhase();
       }
     } else if (state.phase === "active") {
@@ -131,7 +132,6 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
     state.index = index;
     state.phase = "countdown";
     state.countdownRemaining = LEAD_IN_SECONDS;
-    if (state.running) audio.countdownTick();
   }
 
   function currentInterval() {
@@ -190,18 +190,26 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
     intervalNameEl.textContent = interval.name;
 
     if (!state.started && state.phase === "countdown") {
+      countdownRingEl.classList.add("hidden");
+      bigNumberEl.classList.remove("hidden");
       bigNumberEl.textContent = interval.type === "timer" ? formatClock(interval.amount) : String(interval.amount);
       bigNumberEl.className = "big-number";
       bigLabelEl.textContent = interval.type === "timer" ? "seconds — tap play to start" : "reps — tap play to start";
     } else if (state.phase === "countdown") {
-      bigNumberEl.textContent = String(state.countdownRemaining);
-      bigNumberEl.className = "big-number countdown";
+      bigNumberEl.classList.add("hidden");
+      countdownRingEl.classList.remove("hidden");
+      const fraction = (LEAD_IN_SECONDS - state.countdownRemaining) / LEAD_IN_SECONDS;
+      countdownRingFillEl.style.strokeDashoffset = String(RING_CIRCUMFERENCE * (1 - fraction));
       bigLabelEl.textContent = "Get ready";
     } else if (interval.type === "timer") {
+      countdownRingEl.classList.add("hidden");
+      bigNumberEl.classList.remove("hidden");
       bigNumberEl.textContent = formatClock(state.remaining);
       bigNumberEl.className = "big-number" + (state.remaining <= WARNING_SECONDS ? " countdown" : "");
       bigLabelEl.textContent = "seconds left";
     } else {
+      countdownRingEl.classList.add("hidden");
+      bigNumberEl.classList.remove("hidden");
       bigNumberEl.textContent = String(interval.amount);
       bigNumberEl.className = "big-number reps-mode";
       bigLabelEl.textContent = "reps — tap next when done";
