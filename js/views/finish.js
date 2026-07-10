@@ -1,5 +1,6 @@
 import { formatClock, formatDate, formatTime, intervalMeta } from "../util.js";
 import { launchConfetti } from "../confetti.js";
+import { getTheme, PLAYFUL_SWATCHES } from "../theme.js";
 
 function buildSummaryText(summary) {
   const lines = [
@@ -18,7 +19,9 @@ export function renderFinish(root, nav, summary) {
   root.replaceChildren(tpl.content.cloneNode(true));
 
   const canvas = root.querySelector("#confetti-canvas");
-  requestAnimationFrame(() => launchConfetti(canvas));
+  const isPlayful = getTheme().mode === "playful";
+  const confettiOptions = isPlayful ? { colors: PLAYFUL_SWATCHES.map((s) => s.accent) } : {};
+  requestAnimationFrame(() => launchConfetti(canvas, confettiOptions));
 
   const summaryBox = root.querySelector("#summary-box");
   const summaryText = buildSummaryText(summary);
