@@ -89,6 +89,7 @@ export function renderEditor(root, nav, workoutId) {
     card.addEventListener("pointerdown", (e) => {
       if (e.target.closest(".card-actions")) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
+      e.preventDefault();
 
       const startX = e.clientX;
       const startY = e.clientY;
