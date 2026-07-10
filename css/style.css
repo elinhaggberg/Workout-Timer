@@ -316,8 +316,17 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 .delete-btn:active, .remove-btn:active { color: var(--danger); }
 
 /* Bigger tap targets for the home screen's workout cards specifically. */
+.workout-card { padding: 20px 22px; }
 .workout-card .icon-btn { width: 48px; height: 48px; font-size: 1.3rem; }
 .workout-card .card-actions { gap: 6px; }
+
+/* Playful theme: tint every card a low-opacity shade of the chosen accent
+   instead of the flat neutral surface color, so re-picking an accent swatch
+   re-colors the whole app, not just buttons. */
+:root[data-theme="playful"] .card {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
 
 .drawer-item {
   width: 100%;
