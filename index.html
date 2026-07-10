@@ -68,7 +68,7 @@
       <div class="set-header">
         <span class="drag-handle" aria-hidden="true">⠿</span>
         <div class="card-main">
-          <h3 class="card-title">Set</h3>
+          <input type="text" class="card-title set-name-input" placeholder="Set" maxlength="40" />
           <p class="card-meta"></p>
         </div>
         <div class="rounds-stepper">
@@ -153,7 +153,10 @@
 
   <template id="tpl-player">
     <header class="topbar player-topbar">
-      <button class="icon-btn back-btn" aria-label="Exit">✕</button>
+      <div class="player-topbar-left">
+        <button class="icon-btn back-btn" aria-label="Exit">✕</button>
+        <button class="icon-btn sound-toggle-btn" id="sound-toggle-btn" aria-label="Toggle sound">🔇</button>
+      </div>
       <span class="total-timer" id="total-timer">00:00</span>
       <span class="interval-count" id="interval-count"></span>
     </header>
