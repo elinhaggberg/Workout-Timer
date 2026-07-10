@@ -16,6 +16,11 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
     return;
   }
 
+  // The Tabata quick-timer always alternates work/rest, so the 3s "get
+  // ready" lead-in between intervals is redundant there — skip straight to
+  // the active phase for every interval.
+  const isAdhoc = !!adhocWorkout;
+
   const tpl = document.getElementById("tpl-player");
   root.replaceChildren(tpl.content.cloneNode(true));
 
@@ -49,6 +54,12 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
   audio.setEnabled(getSoundEnabled());
   renderSoundToggle();
 
+  if (isAdhoc) {
+    // Prime audio before the very first interval-start beep, since there's
+    // no lead-in countdown here for togglePlay()'s usual unlock to precede it.
+    audio.unlockAudio();
+    state.started = true;
+  }
   enterInterval(0);
   togglePlay(); // start playing immediately — no extra tap needed
 
@@ -131,8 +142,12 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
 
   function enterInterval(index) {
     state.index = index;
-    state.phase = "countdown";
-    state.countdownRemaining = LEAD_IN_SECONDS;
+    if (isAdhoc) {
+      enterActivePhase();
+    } else {
+      state.phase = "countdown";
+      state.countdownRemaining = LEAD_IN_SECONDS;
+    }
   }
 
   function currentInterval() {
