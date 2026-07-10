@@ -31,6 +31,20 @@ const HOLD_MS = 300;
 const MOVE_CANCEL_PX = 8;
 const DRAG_IGNORE_SELECTOR = ".card-actions, .rounds-stepper, .add-to-set-btn, .set-intervals";
 
+// Only one drag (or hold-to-drag) gesture can be in flight at a time. Tracking
+// it here lets a new pointerdown forcibly tear down a stuck previous session
+// (e.g. one a native browser gesture interrupted before it could clean up
+// itself), instead of leaking listeners that corrupt every attempt after it.
+let activeDragTeardown = null;
+
+function forceTeardownActiveDrag() {
+  if (activeDragTeardown) {
+    const teardown = activeDragTeardown;
+    activeDragTeardown = null;
+    teardown();
+  }
+}
+
 export function renderEditor(root, nav, workoutId) {
   const workout = workoutId ? structuredClone(getWorkout(workoutId)) : createEmptyWorkout();
   if (!workout) {
@@ -58,7 +72,8 @@ export function renderEditor(root, nav, workoutId) {
     arr.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
   }
 
-  function renderIntervalList() {
+  function renderIntervalList(scrollToId) {
+    forceTeardownActiveDrag();
     const listEl = root.querySelector("#interval-list");
     if (workout.intervals.length === 0) {
       const empty = document.createElement("p");
@@ -70,6 +85,11 @@ export function renderEditor(root, nav, workoutId) {
     const cards = workout.intervals.map((node) => (isSet(node) ? createSetCardEl(node) : createTopLevelIntervalEl(node)));
     listEl.replaceChildren(...cards);
     cards.forEach((card) => enableDragReorder(card, listEl, (order) => resortArray(workout.intervals, order)));
+
+    if (scrollToId) {
+      const target = listEl.querySelector(`[data-id="${scrollToId}"]`);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
   }
 
   function createTopLevelIntervalEl(interval) {
@@ -158,9 +178,20 @@ export function renderEditor(root, nav, workoutId) {
   }
 
   function enableDragReorder(card, listEl, onReorder) {
+    // Belt-and-suspenders against the browser's own native gestures (text
+    // selection drag, HTML5 drag-and-drop, long-press context menu) hijacking
+    // the pointer stream mid-gesture — when that happens our pointerup/
+    // pointercancel handlers never fire, which used to leak listeners and
+    // corrupt every drag attempt after the first.
+    card.draggable = false;
+    card.addEventListener("dragstart", (e) => e.preventDefault());
+    card.addEventListener("selectstart", (e) => e.preventDefault());
+    card.addEventListener("contextmenu", (e) => e.preventDefault());
+
     card.addEventListener("pointerdown", (e) => {
       if (e.target.closest(DRAG_IGNORE_SELECTOR)) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
+      forceTeardownActiveDrag();
       e.preventDefault();
 
       const startX = e.clientX;
@@ -180,7 +211,9 @@ export function renderEditor(root, nav, workoutId) {
         document.removeEventListener("pointermove", onEarlyMove);
         document.removeEventListener("pointerup", cleanup);
         document.removeEventListener("pointercancel", cleanup);
+        if (activeDragTeardown === cleanup) activeDragTeardown = null;
       }
+      activeDragTeardown = cleanup;
       document.addEventListener("pointermove", onEarlyMove);
       document.addEventListener("pointerup", cleanup);
       document.addEventListener("pointercancel", cleanup);
@@ -228,23 +261,31 @@ export function renderEditor(root, nav, workoutId) {
       else listEl.appendChild(placeholder);
     }
 
-    function onUp() {
+    function finish(shouldReorder) {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
       document.removeEventListener("pointercancel", onUp);
       document.body.style.touchAction = "";
+      if (activeDragTeardown === finish) activeDragTeardown = null;
 
       card.classList.remove("dragging");
       card.style.position = "";
       card.style.left = "";
       card.style.top = "";
       card.style.width = "";
-      placeholder.replaceWith(card);
+      if (placeholder.isConnected) placeholder.replaceWith(card);
 
-      const newOrder = [...listEl.children].map((el) => el.dataset.id);
-      onReorder(newOrder);
+      if (shouldReorder) {
+        const newOrder = [...listEl.children].map((el) => el.dataset.id);
+        onReorder(newOrder);
+      }
     }
 
+    function onUp() {
+      finish(true);
+    }
+
+    activeDragTeardown = () => finish(false);
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onUp);
     document.addEventListener("pointercancel", onUp);
@@ -259,8 +300,9 @@ export function renderEditor(root, nav, workoutId) {
     });
     sheet.el.querySelector("#choice-set").addEventListener("click", () => {
       sheet.close();
-      targetArray.push(makeSetContainer());
-      renderIntervalList();
+      const newSet = makeSetContainer();
+      targetArray.push(newSet);
+      renderIntervalList(newSet.id);
     });
   }
 
@@ -291,7 +333,7 @@ export function renderEditor(root, nav, workoutId) {
             });
             targetArray.push(instance);
             sheet.close();
-            renderIntervalList();
+            renderIntervalList(instance.id);
           });
           return node;
         });
@@ -360,7 +402,7 @@ export function renderEditor(root, nav, workoutId) {
         const drawerEntry = upsertDrawerByName(values);
         const instance = makeIntervalInstance({ ...values, drawerId: drawerEntry.id });
         targetArray.push(instance);
-        renderIntervalList();
+        renderIntervalList(instance.id);
       }
       sheet.close();
     });
