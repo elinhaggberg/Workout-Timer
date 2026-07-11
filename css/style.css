@@ -516,6 +516,7 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   font-size: 0.92rem;
   line-height: 1.5;
 }
+.instructions-body section p + p { margin-top: 8px; }
 .instructions-body strong { color: var(--text); }
 
 /* Theme picker */
