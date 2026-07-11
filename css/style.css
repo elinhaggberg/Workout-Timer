@@ -346,7 +346,17 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   word-break: break-word;
 }
 .workout-card-footer { display: flex; align-items: center; gap: 10px; }
-.workout-card-footer .card-meta { flex: 1; min-width: 0; margin: 0; }
+.card-meta-group { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.card-meta-group .card-meta { margin: 0; }
+.card-completed-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.card-completed-meta .icon { width: 0.9em; height: 0.9em; flex-shrink: 0; }
 .workout-card .icon-btn { width: 48px; height: 48px; font-size: 1.3rem; }
 .workout-card .card-actions { gap: 6px; flex-shrink: 0; }
 

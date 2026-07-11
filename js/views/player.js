@@ -1,4 +1,4 @@
-import { getWorkout, getSoundEnabled, setSoundEnabled } from "../storage.js";
+import { getWorkout, saveWorkout, getSoundEnabled, setSoundEnabled } from "../storage.js";
 import { formatClock, flattenNodes } from "../util.js";
 import * as audio from "../audio.js";
 import { setWakeLockWanted } from "../wakelock.js";
@@ -184,6 +184,10 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
     stopTicking();
     setWakeLockWanted(false);
     audio.workoutComplete();
+    if (!isAdhoc) {
+      workout.lastCompletedSeconds = state.totalElapsed;
+      saveWorkout(workout);
+    }
     nav.toFinish({
       workoutName: workout.name,
       completedAt: Date.now(),
