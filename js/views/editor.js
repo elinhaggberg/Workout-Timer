@@ -302,37 +302,54 @@ export function renderEditor(root, nav, workoutId) {
 
   function openPicker(targetArray) {
     const sheet = openSheet("tpl-interval-picker");
-    const drawer = getDrawer();
+    const drawer = getDrawer().sort((a, b) => a.name.localeCompare(b.name));
     const listEl = sheet.el.querySelector("#drawer-list");
+    const searchInput = sheet.el.querySelector("#drawer-search");
 
-    if (drawer.length === 0) {
-      const empty = document.createElement("p");
-      empty.className = "empty-state";
-      empty.textContent = "No saved intervals yet.";
-      listEl.replaceChildren(empty);
-    } else {
+    if (drawer.length > 10) searchInput.classList.remove("hidden");
+
+    function renderDrawerItems(filterText) {
+      const query = filterText.trim().toLowerCase();
+      const matches = query ? drawer.filter((entry) => entry.name.toLowerCase().includes(query)) : drawer;
+
+      if (drawer.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty-state";
+        empty.textContent = "No saved intervals yet.";
+        listEl.replaceChildren(empty);
+        return;
+      }
+      if (matches.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty-state";
+        empty.textContent = "No matching intervals.";
+        listEl.replaceChildren(empty);
+        return;
+      }
+
       const itemTpl = document.getElementById("tpl-drawer-item");
-      const nodes = drawer
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .map((entry) => {
-          const node = itemTpl.content.cloneNode(true);
-          node.querySelector(".card-title").textContent = entry.name;
-          node.querySelector(".card-meta").textContent = intervalMeta(entry);
-          node.querySelector("button").addEventListener("click", () => {
-            const instance = makeIntervalInstance({
-              name: entry.name,
-              type: entry.type,
-              amount: entry.amount,
-              drawerId: entry.id,
-            });
-            targetArray.push(instance);
-            sheet.close();
-            renderIntervalList(instance.id);
+      const nodes = matches.map((entry) => {
+        const node = itemTpl.content.cloneNode(true);
+        node.querySelector(".card-title").textContent = entry.name;
+        node.querySelector(".card-meta").textContent = intervalMeta(entry);
+        node.querySelector("button").addEventListener("click", () => {
+          const instance = makeIntervalInstance({
+            name: entry.name,
+            type: entry.type,
+            amount: entry.amount,
+            drawerId: entry.id,
           });
-          return node;
+          targetArray.push(instance);
+          sheet.close();
+          renderIntervalList(instance.id);
         });
+        return node;
+      });
       listEl.replaceChildren(...nodes);
     }
+
+    renderDrawerItems("");
+    searchInput.addEventListener("input", () => renderDrawerItems(searchInput.value));
 
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
     sheet.el.querySelector(".new-interval-btn").addEventListener("click", () => {
@@ -345,7 +362,8 @@ export function renderEditor(root, nav, workoutId) {
     const sheet = openSheet("tpl-interval-form");
     const form = sheet.el.querySelector("#interval-form");
     const titleEl = sheet.el.querySelector(".form-title");
-    const amountLabel = sheet.el.querySelector("#amount-label");
+    const durationField = sheet.el.querySelector("#duration-field");
+    const repsField = sheet.el.querySelector("#reps-field");
     const segButtons = [...sheet.el.querySelectorAll(".segmented-option")];
     const updateSavedBtn = sheet.el.querySelector("#update-saved-btn");
 
@@ -354,7 +372,12 @@ export function renderEditor(root, nav, workoutId) {
 
     let currentType = interval ? interval.type : "timer";
     form.name.value = interval ? interval.name : "";
-    form.amount.value = interval ? interval.amount : "";
+    if (interval && interval.type === "timer") {
+      form["amount-min"].value = Math.floor(interval.amount / 60);
+      form["amount-sec"].value = interval.amount % 60;
+    } else if (interval) {
+      form.amount.value = interval.amount;
+    }
     applyType(currentType);
 
     segButtons.forEach((btn) => {
@@ -366,7 +389,8 @@ export function renderEditor(root, nav, workoutId) {
 
     function applyType(type) {
       segButtons.forEach((b) => b.classList.toggle("active", b.dataset.type === type));
-      amountLabel.textContent = type === "timer" ? "Duration (seconds)" : "Number of reps";
+      durationField.classList.toggle("hidden", type !== "timer");
+      repsField.classList.toggle("hidden", type !== "reps");
     }
 
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
@@ -403,7 +427,10 @@ export function renderEditor(root, nav, workoutId) {
 
     function readForm() {
       const name = form.name.value.trim();
-      const amount = Number(form.amount.value);
+      const amount =
+        currentType === "timer"
+          ? (Number(form["amount-min"].value) || 0) * 60 + (Number(form["amount-sec"].value) || 0)
+          : Number(form.amount.value);
       if (!name || !amount || amount <= 0) return null;
       return { name, type: currentType, amount };
     }
