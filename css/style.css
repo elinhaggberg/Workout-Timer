@@ -519,6 +519,9 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 .instructions-body section p + p { margin-top: 8px; }
 .instructions-body strong { color: var(--text); }
 
+/* Customize sheet */
+.home-title-field { margin: 4px 0 20px; }
+
 /* Theme picker */
 .theme-option-list {
   display: flex;
