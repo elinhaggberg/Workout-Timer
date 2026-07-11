@@ -8,6 +8,8 @@ import {
   exportWorkoutData,
   exportBackupData,
   importData,
+  getHomeTitle,
+  setHomeTitle,
 } from "../storage.js";
 import { workoutMeta, intervalMeta, setMeta, isSet } from "../util.js";
 import { unlockAudio } from "../audio.js";
@@ -18,6 +20,8 @@ import { getTheme, setTheme } from "../theme.js";
 export function renderHome(root, nav) {
   const tpl = document.getElementById("tpl-home");
   root.replaceChildren(tpl.content.cloneNode(true));
+
+  document.getElementById("home-title").textContent = getHomeTitle();
 
   document.getElementById("add-workout-btn").addEventListener("click", () => {
     nav.toEditor(null);
@@ -110,9 +114,9 @@ export function renderHome(root, nav) {
       sheet.close();
       openInstructions();
     });
-    sheet.el.querySelector("#theme-btn").addEventListener("click", () => {
+    sheet.el.querySelector("#customize-btn").addEventListener("click", () => {
       sheet.close();
-      openThemePicker();
+      openCustomize();
     });
     sheet.el.querySelector("#export-all-btn").addEventListener("click", async () => {
       const data = exportBackupData();
@@ -131,9 +135,16 @@ export function renderHome(root, nav) {
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
   }
 
-  function openThemePicker() {
-    const sheet = openSheet("tpl-theme-picker");
+  function openCustomize() {
+    const sheet = openSheet("tpl-customize");
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+
+    const titleInput = sheet.el.querySelector("#home-title-input");
+    titleInput.value = getHomeTitle();
+    titleInput.addEventListener("input", () => {
+      setHomeTitle(titleInput.value);
+      document.getElementById("home-title").textContent = getHomeTitle();
+    });
 
     const accentPicker = sheet.el.querySelector("#playful-accent-picker");
     const themeButtons = sheet.el.querySelectorAll(".theme-option");

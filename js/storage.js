@@ -2,6 +2,7 @@ const WORKOUTS_KEY = "wt_workouts_v1";
 const DRAWER_KEY = "wt_interval_drawer_v1";
 const SOUND_KEY = "wt_sound_enabled_v1";
 const THEME_KEY = "wt_theme_v1";
+const HOME_TITLE_KEY = "wt_home_title_v1";
 
 function uid() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -184,6 +185,16 @@ export function getThemePref() {
 
 export function setThemePref(pref) {
   writeJSON(THEME_KEY, pref);
+}
+
+export function getHomeTitle() {
+  return localStorage.getItem(HOME_TITLE_KEY) || "Workouts";
+}
+
+export function setHomeTitle(value) {
+  const trimmed = (value || "").trim();
+  if (trimmed) localStorage.setItem(HOME_TITLE_KEY, trimmed);
+  else localStorage.removeItem(HOME_TITLE_KEY);
 }
 
 export { uid };
