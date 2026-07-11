@@ -9,6 +9,7 @@
   --accent-text: #1c1330;
   --danger: #ff5d5d;
   --font-heading: inherit;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --radius: 14px;
   --gap: 14px;
   font-size: 16px;
@@ -41,6 +42,7 @@
   --danger: #e0454a;
   --font-heading: ui-serif, Georgia, "Times New Roman", serif;
   --radius: 22px;
+  --card-tint: color-mix(in srgb, var(--accent) 14%, var(--surface));
 }
 
 * { box-sizing: border-box; }
@@ -50,7 +52,7 @@ html, body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
   -webkit-touch-callout: none;
@@ -186,6 +188,13 @@ h1, h2, h3 { margin: 0; font-weight: 600; font-family: var(--font-heading); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Sets are the "heading" level of the workout structure (a named group of
+   intervals), so their title is serif and larger; plain intervals stay sans
+   at the base size, in both the editor and the read-only preview modal.
+   The direct-child combinator keeps this scoped to the Set's own title,
+   not the nested interval titles inside it. */
+.set-card > .card-title { font-family: var(--font-heading); font-size: 1.25rem; }
+.interval-card .card-title { font-family: var(--font-body); }
 .card-meta {
   margin: 3px 0 0;
   font-size: 0.85rem;
@@ -346,8 +355,15 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
    re-colors the whole app, not just buttons. The border is a darker shade
    of the page background instead, for a softer outline than the accent. */
 :root[data-theme="playful"] .card {
-  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  background: var(--card-tint);
   border-color: color-mix(in srgb, var(--bg) 85%, black);
+}
+
+/* The rounds stepper otherwise blends into the tinted card behind it; a
+   darker shade of that same tint keeps it readable without introducing an
+   unrelated color. */
+:root[data-theme="playful"] .rounds-stepper {
+  background: color-mix(in srgb, black 12%, var(--card-tint));
 }
 
 .drawer-item {
@@ -512,9 +528,17 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   border-radius: 50%;
   border: 2px solid var(--border);
 }
-.theme-swatch-preview.dark { background: #b9a6ff; }
-.theme-swatch-preview.light { background: #3e7bd9; }
-.theme-swatch-preview.playful { background: #ee4c9b; }
+.theme-swatch-preview.dark { background: linear-gradient(90deg, #0b0d0f 50%, #b9a6ff 50%); }
+.theme-swatch-preview.light { background: linear-gradient(90deg, #ffffff 50%, #3e7bd9 50%); }
+.theme-swatch-preview.playful {
+  background: conic-gradient(
+    #ee4c9b 0deg 72deg,
+    #f2542d 72deg 144deg,
+    #f5b942 144deg 216deg,
+    #b9a6ff 216deg 288deg,
+    #3b2352 288deg 360deg
+  );
+}
 
 .playful-accent-picker { padding-bottom: 8px; }
 .playful-accent-label { color: var(--text-dim); font-size: 0.85rem; margin: 0 0 10px; }
