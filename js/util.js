@@ -23,7 +23,7 @@ export function flattenNodes(nodes) {
     if (isSet(node)) {
       for (let r = 0; r < node.rounds; r++) {
         for (const interval of node.intervals) {
-          flat.push({ ...interval, setName: node.name || "Set", setRound: r + 1, setTotalRounds: node.rounds });
+          flat.push({ ...interval, setId: node.id, setName: node.name || "Set", setRound: r + 1, setTotalRounds: node.rounds });
         }
       }
     } else {
