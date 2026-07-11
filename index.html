@@ -327,6 +327,7 @@
         <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
       </header>
       <button class="text-btn new-interval-btn">+ New interval</button>
+      <input type="text" class="drawer-search hidden" id="drawer-search" placeholder="Search saved intervals…" autocomplete="off" />
       <div class="drawer-list" id="drawer-list"></div>
     </div>
   </template>
@@ -356,9 +357,22 @@
             <button type="button" class="segmented-option" data-type="reps">Reps</button>
           </div>
         </label>
-        <label class="field" id="amount-field">
-          <span id="amount-label">Duration (seconds)</span>
-          <input type="number" name="amount" min="1" max="9999" required inputmode="numeric" />
+        <label class="field" id="duration-field">
+          <span>Duration</span>
+          <div class="duration-picker">
+            <label class="duration-part">
+              <input type="number" name="amount-min" min="0" max="999" inputmode="numeric" placeholder="0" />
+              <span>min</span>
+            </label>
+            <label class="duration-part">
+              <input type="number" name="amount-sec" min="0" max="59" inputmode="numeric" placeholder="0" />
+              <span>sec</span>
+            </label>
+          </div>
+        </label>
+        <label class="field" id="reps-field">
+          <span>Number of reps</span>
+          <input type="number" name="amount" min="1" max="9999" inputmode="numeric" />
         </label>
         <div class="form-actions">
           <button type="button" class="text-btn secondary" id="update-saved-btn">Update saved interval</button>

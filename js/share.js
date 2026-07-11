@@ -21,12 +21,15 @@ function downloadFile(filename, content) {
 
 // Tries the native share sheet first (best for "send this to someone" on a
 // phone); falls back to a plain file download anywhere that isn't supported.
-export async function shareOrDownload(filename, content, shareTitle) {
+// Deliberately omits title/text alongside the file: some share targets (e.g.
+// Messages, "Save to Files") treat those as separate shareable content and
+// create a companion text attachment from them instead of just naming the file.
+export async function shareOrDownload(filename, content) {
   const file = new File([content], filename, { type: "application/json" });
 
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
-      await navigator.share({ files: [file], title: shareTitle });
+      await navigator.share({ files: [file] });
       return "shared";
     } catch (err) {
       if (err && err.name === "AbortError") return "cancelled";

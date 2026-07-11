@@ -126,7 +126,7 @@ export function renderHome(root, nav) {
     sheet.el.querySelector("#export-all-btn").addEventListener("click", async () => {
       const data = exportBackupData();
       const stamp = new Date().toISOString().slice(0, 10);
-      await shareOrDownload(`workout-timer-backup-${stamp}.json`, JSON.stringify(data, null, 2), "Workout Timer backup");
+      await shareOrDownload(`workout-timer-backup-${stamp}.json`, JSON.stringify(data, null, 2));
       sheet.close();
     });
     sheet.el.querySelector("#import-btn").addEventListener("click", () => {
@@ -180,7 +180,7 @@ export function renderHome(root, nav) {
 
   async function shareWorkout(workout) {
     const data = exportWorkoutData(workout);
-    await shareOrDownload(filenameFor(workout.name), JSON.stringify(data, null, 2), workout.name || "Workout");
+    await shareOrDownload(filenameFor(workout.name), JSON.stringify(data, null, 2));
   }
 
   function openImport() {
