@@ -11,7 +11,7 @@ import {
   getHomeTitle,
   setHomeTitle,
 } from "../storage.js";
-import { workoutMeta, intervalMeta, setMeta, isSet } from "../util.js";
+import { workoutMeta, intervalMeta, setMeta, isSet, formatClock } from "../util.js";
 import { unlockAudio } from "../audio.js";
 import { openSheet } from "../sheet.js";
 import { shareOrDownload, filenameFor } from "../share.js";
@@ -49,6 +49,11 @@ export function renderHome(root, nav) {
       const card = node.querySelector(".workout-card");
       node.querySelector(".card-title").textContent = w.name || "Untitled workout";
       node.querySelector(".card-meta").textContent = workoutMeta(w);
+      if (w.lastCompletedSeconds != null) {
+        const completedMeta = node.querySelector(".card-completed-meta");
+        completedMeta.querySelector("span").textContent = `Completed in ${formatClock(w.lastCompletedSeconds)}`;
+        completedMeta.classList.remove("hidden");
+      }
       node.querySelector(".edit-btn").addEventListener("click", (e) => {
         e.stopPropagation();
         nav.toEditor(w.id);
