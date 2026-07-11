@@ -44,7 +44,7 @@ export function renderEditor(root, nav, workoutId) {
   root.querySelector(".back-btn").addEventListener("click", () => nav.toHome());
   root.querySelector(".export-btn").addEventListener("click", async () => {
     const data = exportWorkoutData(workout);
-    await shareOrDownload(filenameFor(workout.name), JSON.stringify(data, null, 2), workout.name || "Workout");
+    await shareOrDownload(filenameFor(workout.name), JSON.stringify(data, null, 2));
   });
   root.querySelector("#add-interval-btn").addEventListener("click", () => openAddChoice(workout.intervals));
   root.querySelector(".save-workout-btn").addEventListener("click", () => {
