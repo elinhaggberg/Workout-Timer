@@ -9,6 +9,7 @@
   --accent-text: #1c1330;
   --danger: #ff5d5d;
   --font-heading: inherit;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --radius: 14px;
   --gap: 14px;
   font-size: 16px;
@@ -50,7 +51,7 @@ html, body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
   -webkit-touch-callout: none;
@@ -186,6 +187,13 @@ h1, h2, h3 { margin: 0; font-weight: 600; font-family: var(--font-heading); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Sets are the "heading" level of the workout structure (a named group of
+   intervals), so their title is serif and larger; plain intervals stay sans
+   at the base size, in both the editor and the read-only preview modal.
+   The direct-child combinator keeps this scoped to the Set's own title,
+   not the nested interval titles inside it. */
+.set-card > .card-title { font-family: var(--font-heading); font-size: 1.25rem; }
+.interval-card .card-title { font-family: var(--font-body); }
 .card-meta {
   margin: 3px 0 0;
   font-size: 0.85rem;
