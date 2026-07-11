@@ -502,6 +502,22 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 .menu-item:last-child { border-bottom: none; }
 .menu-item .icon { width: 1.1em; height: 1.1em; color: var(--text-dim); flex-shrink: 0; }
 
+/* Instructions */
+.instructions-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 8px;
+}
+.instructions-body section h3 { font-size: 1.05rem; margin-bottom: 4px; }
+.instructions-body section p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.instructions-body strong { color: var(--text); }
+
 /* Theme picker */
 .theme-option-list {
   display: flex;
