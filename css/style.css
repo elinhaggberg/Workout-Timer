@@ -1,21 +1,7 @@
+/* Light is the app default, so its values live in the bare :root — this is
+   what paints before the anti-flash script or theme.js has run (e.g. a
+   brand-new visitor with no stored preference yet). */
 :root {
-  --bg: #0b0d0f;
-  --surface: #16191d;
-  --surface-2: #1e2227;
-  --border: #2a2f36;
-  --text: #f2f3f5;
-  --text-dim: #8a919c;
-  --accent: #b9a6ff;
-  --accent-text: #1c1330;
-  --danger: #ff5d5d;
-  --font-heading: inherit;
-  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --radius: 14px;
-  --gap: 14px;
-  font-size: 16px;
-}
-
-:root[data-theme="light"] {
   --bg: #f6f7f9;
   --surface: #ffffff;
   --surface-2: #edeff2;
@@ -25,6 +11,23 @@
   --accent: #3e7bd9;
   --accent-text: #ffffff;
   --danger: #d9433f;
+  --font-heading: inherit;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --radius: 14px;
+  --gap: 14px;
+  font-size: 16px;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b0d0f;
+  --surface: #16191d;
+  --surface-2: #1e2227;
+  --border: #2a2f36;
+  --text: #f2f3f5;
+  --text-dim: #8a919c;
+  --accent: #b9a6ff;
+  --accent-text: #1c1330;
+  --danger: #ff5d5d;
 }
 
 /* --accent/--accent-text are overridden inline via theme.js for the user's

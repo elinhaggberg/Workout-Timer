@@ -19,7 +19,7 @@ export const PLAYFUL_SWATCHES = [
 
 const THEME_BG = { dark: "#0b0d0f", light: "#f6f7f9", playful: "#f5eedc" };
 
-const DEFAULT_PREF = { mode: "dark", playfulAccent: "lipstick" };
+const DEFAULT_PREF = { mode: "light", playfulAccent: "lipstick" };
 
 export function getTheme() {
   return { ...DEFAULT_PREF, ...getThemePref() };
@@ -45,5 +45,5 @@ export function applyTheme() {
   }
 
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-  if (themeColorMeta) themeColorMeta.setAttribute("content", THEME_BG[pref.mode] || THEME_BG.dark);
+  if (themeColorMeta) themeColorMeta.setAttribute("content", THEME_BG[pref.mode] || THEME_BG.light);
 }

@@ -5,7 +5,7 @@
   <script>
     // Applied before the stylesheet paints, since the module script that
     // normally owns theming (js/theme.js) runs after HTML parsing and would
-    // otherwise flash the default dark theme first on every load.
+    // otherwise flash the default light theme first on every load.
     try {
       var themeMode = (JSON.parse(localStorage.getItem("wt_theme_v1") || "{}") || {}).mode;
       if (themeMode) document.documentElement.dataset.theme = themeMode;
@@ -14,12 +14,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <title>Workout Timer</title>
   <meta name="description" content="A simple, ad-free workout interval timer." />
-  <meta name="theme-color" content="#0b0d0f" />
+  <meta name="theme-color" content="#f6f7f9" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
