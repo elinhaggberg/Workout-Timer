@@ -25,6 +25,7 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
   const tpl = document.getElementById("tpl-player");
   root.replaceChildren(tpl.content.cloneNode(true));
 
+  const progressFillEl = root.querySelector("#player-progress-fill");
   const totalTimerEl = root.querySelector("#total-timer");
   const intervalCountEl = root.querySelector("#interval-count");
   const intervalNameEl = root.querySelector("#interval-name");
@@ -192,7 +193,14 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
       workoutName: workout.name,
       completedAt: Date.now(),
       totalSeconds: state.totalElapsed,
-      intervals: sequence.map((i) => ({ name: i.name, type: i.type, amount: i.amount })),
+      intervals: sequence.map((i) => ({
+        name: i.name,
+        type: i.type,
+        amount: i.amount,
+        setId: i.setId,
+        setName: i.setName,
+        setTotalRounds: i.setTotalRounds,
+      })),
     });
   }
 
@@ -206,6 +214,7 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
     totalTimerEl.textContent = formatClock(state.totalElapsed);
     intervalCountEl.textContent = `${state.index + 1} / ${sequence.length}`;
     playPauseBtn.innerHTML = state.running ? ICON_PAUSE : ICON_PLAY;
+    progressFillEl.style.width = `${(state.index / sequence.length) * 100}%`;
 
     const interval = currentInterval();
     intervalNameEl.textContent = interval.name;
