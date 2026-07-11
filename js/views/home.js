@@ -106,6 +106,10 @@ export function renderHome(root, nav) {
   function openSettingsMenu() {
     const sheet = openSheet("tpl-settings-menu");
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+    sheet.el.querySelector("#instructions-btn").addEventListener("click", () => {
+      sheet.close();
+      openInstructions();
+    });
     sheet.el.querySelector("#theme-btn").addEventListener("click", () => {
       sheet.close();
       openThemePicker();
@@ -120,6 +124,11 @@ export function renderHome(root, nav) {
       sheet.close();
       openImport();
     });
+  }
+
+  function openInstructions() {
+    const sheet = openSheet("tpl-instructions");
+    sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
   }
 
   function openThemePicker() {

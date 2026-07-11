@@ -71,6 +71,14 @@
         <h2>Settings</h2>
         <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
       </header>
+      <button type="button" class="menu-item" id="instructions-btn">
+        <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+          <circle cx="256" cy="256" r="216" fill="none" stroke="currentColor" stroke-width="40" />
+          <circle cx="256" cy="176" r="28" />
+          <rect x="228" y="232" width="56" height="180" rx="12" />
+        </svg>
+        <span>Instructions</span>
+      </button>
       <button type="button" class="menu-item" id="theme-btn">
         <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
           <rect x="32" y="86" width="448" height="32" rx="16" />
@@ -90,6 +98,45 @@
         <svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M64 0C28.7 0 0 28.7 0 64l0 240 182.1 0-31-31c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l72 72c9.4 9.4 9.4 24.6 0 33.9l-72 72c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l31-31-182.1 0 0 96c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-277.5c0-17-6.7-33.3-18.7-45.3L258.7 18.7C246.7 6.7 230.5 0 213.5 0L64 0zM325.5 176L232 176c-13.3 0-24-10.7-24-24L208 58.5 325.5 176z"/></svg>
         <span>Import</span>
       </button>
+    </div>
+  </template>
+
+  <template id="tpl-instructions">
+    <div class="sheet instructions-sheet">
+      <header class="sheet-header">
+        <h2>Instructions</h2>
+        <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+      </header>
+      <div class="instructions-body">
+        <section>
+          <h3>Building a workout</h3>
+          <p>Tap the <strong>+</strong> button on the home screen to start a new workout, give it a name, then add intervals — either a timed exercise or a rep-based one.</p>
+        </section>
+        <section>
+          <h3>Sets</h3>
+          <p>Group a few intervals into a <strong>Set</strong> to repeat them for several rounds — perfect for circuits. Give the Set its own name and adjust the rounds with the stepper.</p>
+        </section>
+        <section>
+          <h3>Reordering</h3>
+          <p>Press and drag the grip handle on the left of any card to reorder intervals and Sets.</p>
+        </section>
+        <section>
+          <h3>Playing a workout</h3>
+          <p>Tap play from the home screen or preview and it starts right away — no extra tap needed. Use the sound icon to toggle beeps, and the prev/next buttons to move between intervals.</p>
+        </section>
+        <section>
+          <h3>Quick Tabata timer</h3>
+          <p>The stopwatch button on the home screen opens a one-off work/rest timer you can start immediately without saving it as a workout.</p>
+        </section>
+        <section>
+          <h3>Backup &amp; sharing</h3>
+          <p>In the gear menu, export a single workout to share with someone, or back up everything at once. Importing always merges into your existing workouts — it never replaces them.</p>
+        </section>
+        <section>
+          <h3>Themes</h3>
+          <p>Pick Dark, Light, or Playful from the gear menu. Playful lets you choose your own accent color too.</p>
+        </section>
+      </div>
     </div>
   </template>
 
