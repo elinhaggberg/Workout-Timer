@@ -764,6 +764,11 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+.up-next {
+  margin: 18px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
 
 .player-controls {
   display: flex;

@@ -32,6 +32,7 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
   const setContextEl = root.querySelector("#set-context");
   const bigNumberEl = root.querySelector("#big-number");
   const bigLabelEl = root.querySelector("#big-label");
+  const upNextEl = root.querySelector("#up-next");
   const countdownRingEl = root.querySelector("#countdown-ring");
   const countdownRingFillEl = root.querySelector("#countdown-ring-fill");
   const playPauseBtn = root.querySelector("#play-pause-btn");
@@ -255,6 +256,14 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
       bigNumberEl.textContent = String(interval.amount);
       bigNumberEl.className = "big-number reps-mode";
       bigLabelEl.textContent = "reps — tap next when done";
+    }
+
+    const nextInterval = sequence[state.index + 1];
+    if (state.phase === "active" && nextInterval) {
+      upNextEl.textContent = `Up next: ${nextInterval.name}`;
+      upNextEl.classList.remove("hidden");
+    } else {
+      upNextEl.classList.add("hidden");
     }
   }
 }
