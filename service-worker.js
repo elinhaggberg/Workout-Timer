@@ -1,4 +1,4 @@
-const CACHE_NAME = "workout-timer-v1";
+const CACHE_NAME = "workout-timer-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -14,6 +14,8 @@ const APP_SHELL = [
   "./js/util.js",
   "./js/wakelock.js",
   "./js/confetti.js",
+  "./js/tabs.js",
+  "./js/exerciseLibrary.js",
   "./js/views/home.js",
   "./js/views/editor.js",
   "./js/views/player.js",
