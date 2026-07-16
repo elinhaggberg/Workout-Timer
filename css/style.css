@@ -1036,7 +1036,16 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   font-size: 0.85rem;
   color: var(--text-dim);
 }
-.goal-status-box p { margin: 2px 0; }
+.goal-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.goal-status-row + .goal-status-row { margin-top: 8px; }
+.goal-status-icon { display: inline-flex; flex-shrink: 0; color: var(--accent); }
+.goal-status-icon svg { width: 18px; height: 18px; }
+.goal-status-label { flex: 1; }
+.goal-status-streak { flex-shrink: 0; font-weight: 600; color: var(--text); }
 .diary-log-row {
   display: flex;
   align-items: center;

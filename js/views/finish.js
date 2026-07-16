@@ -2,14 +2,15 @@ import { formatClock, formatDate, formatTime, groupIntervals, formatGroupLine } 
 import { launchConfetti } from "../confetti.js";
 import { getTheme, PLAYFUL_SWATCHES } from "../theme.js";
 import { addDiaryEntry, updateDiaryEntry, getGoals } from "../storage.js";
-import { computeGoalStatus, describeGoal } from "../goals.js";
+import { computeGoalStatus, describeGoal, formatStreakText } from "../goals.js";
 import { openSheet } from "../sheet.js";
 import { renderDiaryEntrySheet } from "./diary.js";
+import { ICON_GOAL } from "../icons.js";
 
 function buildGoalLines(goals) {
   return goals.map((goal) => {
     const { progress, streak } = computeGoalStatus(goal);
-    const streakPart = streak > 0 ? `, streak: ${streak}` : "";
+    const streakPart = streak > 0 ? ` · ${formatStreakText(streak)}` : "";
     return `Goal (${describeGoal(goal)}): ${progress.count}/${progress.target} this week${streakPart}`;
   });
 }
@@ -57,10 +58,24 @@ export function renderFinish(root, nav, summary) {
   if (goals.length > 0) {
     goalStatusBox.classList.remove("hidden");
     goalStatusBox.replaceChildren(
-      ...buildGoalLines(goals).map((line) => {
-        const p = document.createElement("p");
-        p.textContent = line;
-        return p;
+      ...goals.map((goal) => {
+        const { progress, streak } = computeGoalStatus(goal);
+        const row = document.createElement("div");
+        row.className = "goal-status-row";
+        const icon = document.createElement("span");
+        icon.className = "goal-status-icon";
+        icon.innerHTML = ICON_GOAL;
+        const label = document.createElement("span");
+        label.className = "goal-status-label";
+        label.textContent = `${describeGoal(goal)}: ${progress.count}/${progress.target} this week`;
+        row.append(icon, label);
+        if (streak > 0) {
+          const streakEl = document.createElement("span");
+          streakEl.className = "goal-status-streak";
+          streakEl.textContent = `🔥 ${streak}`;
+          row.appendChild(streakEl);
+        }
+        return row;
       })
     );
   }

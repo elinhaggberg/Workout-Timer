@@ -107,6 +107,10 @@ export function computeGoalStatus(goal, diaryEntries = getDiaryEntries()) {
   return { progress: { count: satisfied, target: occurred }, streak };
 }
 
+export function formatStreakText(streak) {
+  return streak > 0 ? `🔥 ${streak} week${streak !== 1 ? "s" : ""} streak` : "No streak yet";
+}
+
 export function describeGoal(goal) {
   if (goal.type === "weekly") {
     return `${goal.timesPerWeek} day${goal.timesPerWeek !== 1 ? "s" : ""} per week`;
