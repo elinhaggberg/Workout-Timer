@@ -13,6 +13,8 @@ import {
 import { intervalMeta, isSet, setMeta } from "../util.js";
 import { openSheet } from "../sheet.js";
 import { shareOrDownload, filenameFor } from "../share.js";
+import { CLASSICS } from "../exerciseLibrary.js";
+import { initTabs } from "../tabs.js";
 
 // Only one drag gesture can be in flight at a time. Tracking
 // it here lets a new pointerdown forcibly tear down a stuck previous session
@@ -305,8 +307,11 @@ export function renderEditor(root, nav, workoutId) {
     const drawer = getDrawer().sort((a, b) => a.name.localeCompare(b.name));
     const listEl = sheet.el.querySelector("#drawer-list");
     const searchInput = sheet.el.querySelector("#drawer-search");
+    const classicsListEl = sheet.el.querySelector("#classics-drawer-list");
+    const classicsSearchInput = sheet.el.querySelector("#classics-search");
 
     if (drawer.length > 10) searchInput.classList.remove("hidden");
+    if (CLASSICS.length > 10) classicsSearchInput.classList.remove("hidden");
 
     function renderDrawerItems(filterText) {
       const query = filterText.trim().toLowerCase();
@@ -348,8 +353,49 @@ export function renderEditor(root, nav, workoutId) {
       listEl.replaceChildren(...nodes);
     }
 
+    function renderClassicsItems(filterText) {
+      const query = filterText.trim().toLowerCase();
+      const matches = query ? CLASSICS.filter((entry) => entry.name.toLowerCase().includes(query)) : CLASSICS;
+
+      if (matches.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty-state";
+        empty.textContent = "No matching exercises.";
+        classicsListEl.replaceChildren(empty);
+        return;
+      }
+
+      const itemTpl = document.getElementById("tpl-drawer-item");
+      const nodes = matches.map((entry) => {
+        const node = itemTpl.content.cloneNode(true);
+        node.querySelector(".card-title").textContent = entry.name;
+        node.querySelector(".card-meta").textContent = intervalMeta(entry);
+        node.querySelector("button").addEventListener("click", () => {
+          const drawerEntry = upsertDrawerByName({ name: entry.name, type: entry.type, amount: entry.amount });
+          const instance = makeIntervalInstance({
+            name: entry.name,
+            type: entry.type,
+            amount: entry.amount,
+            drawerId: drawerEntry.id,
+          });
+          targetArray.push(instance);
+          sheet.close();
+          renderIntervalList(instance.id);
+        });
+        return node;
+      });
+      classicsListEl.replaceChildren(...nodes);
+    }
+
     renderDrawerItems("");
+    renderClassicsItems("");
     searchInput.addEventListener("input", () => renderDrawerItems(searchInput.value));
+    classicsSearchInput.addEventListener("input", () => renderClassicsItems(classicsSearchInput.value));
+
+    initTabs(sheet.el, {
+      mine: sheet.el.querySelector("#picker-mine-panel"),
+      classics: sheet.el.querySelector("#picker-classics-panel"),
+    });
 
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
     sheet.el.querySelector(".new-interval-btn").addEventListener("click", () => {
