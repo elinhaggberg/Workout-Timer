@@ -2,6 +2,8 @@ import { renderHome } from "./views/home.js";
 import { renderEditor } from "./views/editor.js";
 import { renderPlayer } from "./views/player.js";
 import { renderFinish } from "./views/finish.js";
+import { renderDiary } from "./views/diary.js";
+import { renderGoals } from "./views/goals.js";
 import { applyTheme } from "./theme.js";
 
 applyTheme();
@@ -29,6 +31,12 @@ const nav = {
   toFinish: (summary) => {
     pendingFinishSummary = summary;
     location.hash = "#/finish";
+  },
+  toDiary: () => {
+    location.hash = "#/diary";
+  },
+  toGoals: () => {
+    location.hash = "#/goals";
   },
 };
 
@@ -59,6 +67,12 @@ function route() {
         return;
       }
       renderFinish(root, nav, pendingFinishSummary);
+      break;
+    case "diary":
+      renderDiary(root, nav);
+      break;
+    case "goals":
+      renderGoals(root, nav);
       break;
     default:
       renderHome(root, nav);

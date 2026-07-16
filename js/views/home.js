@@ -14,6 +14,7 @@ import {
   upsertDrawerByName,
   updateDrawerInterval,
   deleteDrawerInterval,
+  getGoals,
 } from "../storage.js";
 import { workoutMeta, intervalMeta, setMeta, isSet, formatClock } from "../util.js";
 import { unlockAudio } from "../audio.js";
@@ -22,6 +23,7 @@ import { shareOrDownload, filenameFor } from "../share.js";
 import { getTheme, setTheme } from "../theme.js";
 import { CLASSICS_CATEGORIES, classicsByCategory } from "../exerciseLibrary.js";
 import { initTabs } from "../tabs.js";
+import { computeGoalStatus, describeGoal } from "../goals.js";
 
 export function renderHome(root, nav) {
   const tpl = document.getElementById("tpl-home");
@@ -34,8 +36,25 @@ export function renderHome(root, nav) {
   });
   document.getElementById("tabata-btn").addEventListener("click", openTabataSetup);
   document.getElementById("settings-btn").addEventListener("click", openSettingsMenu);
+  document.getElementById("home-goal-strip").addEventListener("click", () => nav.toGoals());
 
+  renderGoalStrip();
   renderList();
+
+  function renderGoalStrip() {
+    const strip = document.getElementById("home-goal-strip");
+    const goal = getGoals().find((g) => g.showOnHome);
+    if (!goal) {
+      strip.classList.add("hidden");
+      return;
+    }
+    const { progress, streak } = computeGoalStatus(goal);
+    const pct = progress.target > 0 ? Math.min(100, (progress.count / progress.target) * 100) : 0;
+    strip.classList.remove("hidden");
+    strip.querySelector(".home-goal-label").textContent = describeGoal(goal);
+    strip.querySelector(".home-goal-progress-fill").style.width = `${pct}%`;
+    strip.querySelector(".home-goal-streak").textContent = streak > 0 ? `🔥 ${streak}` : `${progress.count}/${progress.target}`;
+  }
 
   function renderList() {
     const listEl = document.getElementById("workout-list");
@@ -121,6 +140,14 @@ export function renderHome(root, nav) {
   function openSettingsMenu() {
     const sheet = openSheet("tpl-settings-menu");
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+    sheet.el.querySelector("#diary-btn").addEventListener("click", () => {
+      sheet.close();
+      nav.toDiary();
+    });
+    sheet.el.querySelector("#goals-btn").addEventListener("click", () => {
+      sheet.close();
+      nav.toGoals();
+    });
     sheet.el.querySelector("#instructions-btn").addEventListener("click", () => {
       sheet.close();
       openInstructions();

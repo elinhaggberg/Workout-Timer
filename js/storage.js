@@ -3,6 +3,8 @@ const DRAWER_KEY = "wt_interval_drawer_v1";
 const SOUND_KEY = "wt_sound_enabled_v1";
 const THEME_KEY = "wt_theme_v1";
 const HOME_TITLE_KEY = "wt_home_title_v1";
+const DIARY_KEY = "wt_diary_v1";
+const GOALS_KEY = "wt_goals_v1";
 
 function uid() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -199,6 +201,68 @@ export function setHomeTitle(value) {
   const trimmed = (value || "").trim();
   if (trimmed) localStorage.setItem(HOME_TITLE_KEY, trimmed);
   else localStorage.removeItem(HOME_TITLE_KEY);
+}
+
+// ---- Diary ----
+
+export function getDiaryEntries() {
+  return readJSON(DIARY_KEY, []);
+}
+
+export function getDiaryEntry(id) {
+  return getDiaryEntries().find((e) => e.id === id) || null;
+}
+
+export function addDiaryEntry(entry) {
+  const entries = getDiaryEntries();
+  const full = { id: uid(), createdAt: Date.now(), notes: "", ...entry };
+  entries.push(full);
+  writeJSON(DIARY_KEY, entries);
+  return full;
+}
+
+export function updateDiaryEntry(id, patch) {
+  const entries = getDiaryEntries();
+  const idx = entries.findIndex((e) => e.id === id);
+  if (idx < 0) return null;
+  entries[idx] = { ...entries[idx], ...patch };
+  writeJSON(DIARY_KEY, entries);
+  return entries[idx];
+}
+
+export function deleteDiaryEntry(id) {
+  writeJSON(DIARY_KEY, getDiaryEntries().filter((e) => e.id !== id));
+}
+
+// ---- Goals ----
+
+export function getGoals() {
+  return readJSON(GOALS_KEY, []);
+}
+
+export function getGoal(id) {
+  return getGoals().find((g) => g.id === id) || null;
+}
+
+export function addGoal(goal) {
+  const goals = getGoals();
+  const full = { id: uid(), createdAt: Date.now(), showOnHome: false, ...goal };
+  goals.push(full);
+  writeJSON(GOALS_KEY, goals);
+  return full;
+}
+
+export function updateGoal(id, patch) {
+  const goals = getGoals();
+  const idx = goals.findIndex((g) => g.id === id);
+  if (idx < 0) return null;
+  goals[idx] = { ...goals[idx], ...patch };
+  writeJSON(GOALS_KEY, goals);
+  return goals[idx];
+}
+
+export function deleteGoal(id) {
+  writeJSON(GOALS_KEY, getGoals().filter((g) => g.id !== id));
 }
 
 export { uid };
