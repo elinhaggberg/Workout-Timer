@@ -1,5 +1,5 @@
 import { getGoals, addGoal, updateGoal, deleteGoal } from "../storage.js";
-import { computeGoalStatus, describeGoal, WEEKDAY_LABELS } from "../goals.js";
+import { computeGoalStatus, describeGoal, formatStreakText, WEEKDAY_LABELS } from "../goals.js";
 import { openSheet } from "../sheet.js";
 
 export function renderGoals(root, nav) {
@@ -35,9 +35,8 @@ export function renderGoals(root, nav) {
         const pct = progress.target > 0 ? Math.min(100, (progress.count / progress.target) * 100) : 0;
         node.querySelector(".goal-progress-fill").style.width = `${pct}%`;
 
-        const streakText = streak > 0 ? `🔥 ${streak} week${streak !== 1 ? "s" : ""} streak` : "No streak yet";
         node.querySelector(".goal-streak").textContent =
-          `${progress.count}/${progress.target} this week · ${streakText}`;
+          `${progress.count}/${progress.target} this week · ${formatStreakText(streak)}`;
 
         node.querySelector(".edit-btn").addEventListener("click", () => openGoalSettings(goal));
         node.querySelector(".delete-btn").addEventListener("click", () => {

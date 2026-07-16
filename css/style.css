@@ -899,6 +899,7 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   border-radius: var(--radius);
   text-align: left;
 }
+.home-goal-icon { width: 1.2em; height: 1.2em; color: var(--accent); flex-shrink: 0; }
 .home-goal-label { font-size: 0.88rem; font-weight: 600; flex-shrink: 0; }
 .home-goal-progress-bar {
   flex: 1;
@@ -1035,7 +1036,16 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   font-size: 0.85rem;
   color: var(--text-dim);
 }
-.goal-status-box p { margin: 2px 0; }
+.goal-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.goal-status-row + .goal-status-row { margin-top: 8px; }
+.goal-status-icon { display: inline-flex; flex-shrink: 0; color: var(--accent); }
+.goal-status-icon svg { width: 18px; height: 18px; }
+.goal-status-label { flex: 1; }
+.goal-status-streak { flex-shrink: 0; font-weight: 600; color: var(--text); }
 .diary-log-row {
   display: flex;
   align-items: center;
@@ -1060,4 +1070,10 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   border-radius: 16px;
 }
 :root[data-theme="playful"] .goal-settings-sheet .goal-type-toggle { border-radius: 14px; }
+
+/* The goal progress track otherwise blends into the tinted card behind it,
+   same issue (and same fix) as the rounds stepper on a Set card. */
+:root[data-theme="playful"] .goal-progress-bar {
+  background: color-mix(in srgb, black 12%, var(--card-tint));
+}
 :root[data-theme="playful"] .workout-card:active { transform: scale(0.985); }
