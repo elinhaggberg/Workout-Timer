@@ -1,38 +1,20 @@
-import { formatClock, formatDate, formatTime, intervalMeta } from "../util.js";
+import { formatClock, formatDate, formatTime, groupIntervals, formatGroupLine } from "../util.js";
 import { launchConfetti } from "../confetti.js";
 import { getTheme, PLAYFUL_SWATCHES } from "../theme.js";
+import { addDiaryEntry, updateDiaryEntry, getGoals } from "../storage.js";
+import { computeGoalStatus, describeGoal } from "../goals.js";
+import { openSheet } from "../sheet.js";
+import { renderDiaryEntrySheet } from "./diary.js";
 
-// Collapses a Set's repeated rounds (e.g. 3 rounds of the same 2 intervals,
-// flattened to 6 entries) back into a single compact line, so a long workout
-// summary doesn't repeat the same few intervals over and over.
-function groupIntervals(intervals) {
-  const groups = [];
-  let i = 0;
-  while (i < intervals.length) {
-    const current = intervals[i];
-    if (current.setId) {
-      let j = i;
-      while (j < intervals.length && intervals[j].setId === current.setId) j++;
-      const runLength = j - i;
-      const rounds = current.setTotalRounds || 1;
-      const perRound = Math.max(1, Math.round(runLength / rounds));
-      groups.push({ isSet: true, setName: current.setName, rounds, pattern: intervals.slice(i, i + perRound) });
-      i = j;
-    } else {
-      groups.push({ isSet: false, interval: current });
-      i++;
-    }
-  }
-  return groups;
+function buildGoalLines(goals) {
+  return goals.map((goal) => {
+    const { progress, streak } = computeGoalStatus(goal);
+    const streakPart = streak > 0 ? `, streak: ${streak}` : "";
+    return `Goal (${describeGoal(goal)}): ${progress.count}/${progress.target} this week${streakPart}`;
+  });
 }
 
-function formatGroupLine(group) {
-  if (!group.isSet) return `${group.interval.name}: ${intervalMeta(group.interval)}`;
-  const pattern = group.pattern.map((p) => `${p.name} ${intervalMeta(p)}`).join(", ");
-  return `${group.setName} × ${group.rounds} rounds: ${pattern}`;
-}
-
-function buildSummaryText(summary) {
+function buildSummaryText(summary, goals) {
   const groups = groupIntervals(summary.intervals);
   const lines = [
     `Workout: ${summary.workoutName || "Untitled workout"}`,
@@ -42,6 +24,9 @@ function buildSummaryText(summary) {
     "Intervals:",
     ...groups.map((g) => `- ${formatGroupLine(g)}`),
   ];
+  if (goals.length > 0) {
+    lines.push("", ...buildGoalLines(goals));
+  }
   return lines.join("\n");
 }
 
@@ -54,8 +39,10 @@ export function renderFinish(root, nav, summary) {
   const confettiOptions = isPlayful ? { colors: PLAYFUL_SWATCHES.map((s) => s.accent) } : {};
   requestAnimationFrame(() => launchConfetti(canvas, confettiOptions));
 
+  const goals = getGoals();
+
   const summaryBox = root.querySelector("#summary-box");
-  const summaryText = buildSummaryText(summary);
+  const summaryText = buildSummaryText(summary, goals);
 
   const strong = document.createElement("strong");
   strong.textContent = summary.workoutName || "Untitled workout";
@@ -64,6 +51,63 @@ export function renderFinish(root, nav, summary) {
   summaryBox.appendChild(document.createTextNode(`\nDuration: ${formatClock(summary.totalSeconds)}\n\n`));
   groupIntervals(summary.intervals).forEach((g) => {
     summaryBox.appendChild(document.createTextNode(`• ${formatGroupLine(g)}\n`));
+  });
+
+  const goalStatusBox = root.querySelector("#goal-status-box");
+  if (goals.length > 0) {
+    goalStatusBox.classList.remove("hidden");
+    goalStatusBox.replaceChildren(
+      ...buildGoalLines(goals).map((line) => {
+        const p = document.createElement("p");
+        p.textContent = line;
+        return p;
+      })
+    );
+  }
+
+  // Every completed workout is logged to the diary automatically — this only
+  // runs once, since renderFinish only fires on an actual finish event (a
+  // page reload on #/finish has no pending summary and bounces to Home).
+  const diaryEntry = addDiaryEntry({
+    type: "workout",
+    workoutName: summary.workoutName,
+    totalSeconds: summary.totalSeconds,
+    intervals: summary.intervals,
+    createdAt: summary.completedAt,
+  });
+
+  const addNotesBtn = root.querySelector("#add-notes-btn");
+  const seeEntryLink = root.querySelector("#see-entry-link");
+
+  function renderNotesState() {
+    if (diaryEntry.notes) {
+      addNotesBtn.textContent = "Saved to Diary";
+      seeEntryLink.classList.remove("hidden");
+    } else {
+      addNotesBtn.textContent = "Add notes";
+      seeEntryLink.classList.add("hidden");
+    }
+  }
+  renderNotesState();
+
+  addNotesBtn.addEventListener("click", () => {
+    const sheet = openSheet("tpl-add-notes");
+    const textarea = sheet.el.querySelector("#notes-textarea");
+    textarea.value = diaryEntry.notes || "";
+    sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+    sheet.el.querySelector(".save-notes-btn").addEventListener("click", () => {
+      const notes = textarea.value.trim();
+      updateDiaryEntry(diaryEntry.id, { notes });
+      diaryEntry.notes = notes;
+      sheet.close();
+      renderNotesState();
+    });
+    setTimeout(() => textarea.focus(), 50);
+  });
+
+  seeEntryLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    renderDiaryEntrySheet(diaryEntry);
   });
 
   const copyBtn = root.querySelector("#copy-btn");

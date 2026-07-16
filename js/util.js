@@ -57,6 +57,37 @@ export function workoutMeta(workout) {
   return parts.join(" · ");
 }
 
+// Collapses a Set's repeated rounds (e.g. 3 rounds of the same 2 intervals,
+// flattened to 6 entries) back into a single compact line, so a long workout
+// summary doesn't repeat the same few intervals over and over. Shared between
+// the finish screen and diary entries, since both render the same summary.
+export function groupIntervals(intervals) {
+  const groups = [];
+  let i = 0;
+  while (i < intervals.length) {
+    const current = intervals[i];
+    if (current.setId) {
+      let j = i;
+      while (j < intervals.length && intervals[j].setId === current.setId) j++;
+      const runLength = j - i;
+      const rounds = current.setTotalRounds || 1;
+      const perRound = Math.max(1, Math.round(runLength / rounds));
+      groups.push({ isSet: true, setName: current.setName, rounds, pattern: intervals.slice(i, i + perRound) });
+      i = j;
+    } else {
+      groups.push({ isSet: false, interval: current });
+      i++;
+    }
+  }
+  return groups;
+}
+
+export function formatGroupLine(group) {
+  if (!group.isSet) return `${group.interval.name}: ${intervalMeta(group.interval)}`;
+  const pattern = group.pattern.map((p) => `${p.name} ${intervalMeta(p)}`).join(", ");
+  return `${group.setName} × ${group.rounds} rounds: ${pattern}`;
+}
+
 export function formatDate(ts) {
   const d = new Date(ts);
   return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });

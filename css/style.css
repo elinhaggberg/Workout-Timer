@@ -886,4 +886,178 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 :root[data-theme="playful"] .text-btn:active { transform: scale(0.94); }
 :root[data-theme="playful"] .swatch-btn:active { transform: scale(0.85); }
 :root[data-theme="playful"] .theme-option:active { transform: scale(0.96); }
+
+/* Home screen goal strip */
+.home-goal-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 16px 14px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: left;
+}
+.home-goal-label { font-size: 0.88rem; font-weight: 600; flex-shrink: 0; }
+.home-goal-progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.home-goal-progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+.home-goal-streak { font-size: 0.85rem; color: var(--text-dim); flex-shrink: 0; }
+
+/* Diary */
+.diary-row { cursor: pointer; }
+.diary-textarea {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  color: var(--text);
+  font-size: 0.98rem;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 14px;
+}
+.diary-textarea:focus { outline: none; border-color: var(--accent); }
+
+.diary-entry-sheet .diary-entry-body {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin-bottom: 14px;
+}
+.diary-entry-body strong { color: var(--text); }
+.diary-entry-notes h3 { font-size: 0.95rem; margin-bottom: 6px; }
+.diary-entry-notes-text { color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; margin: 0; }
+
+/* Diary calendar */
+.cal-header h2 { font-size: 1.05rem; text-align: center; }
+.cal-weekday-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 0 8px;
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding-bottom: 8px;
+}
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.cal-day-empty { color: var(--text-dim); cursor: default; }
+.cal-day.today { border: 1px solid var(--accent); }
+.cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+/* Goals */
+.goal-card { flex-direction: column; align-items: stretch; gap: 8px; }
+.goal-title { font-size: 1.05rem; }
+.goal-meta { margin: 0; }
+.goal-progress-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.goal-progress-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.3s ease; }
+.goal-streak { margin: 0; }
+.goal-card-actions { justify-content: flex-end; }
+
+.goal-type-toggle { margin-bottom: 18px; }
+.goal-section { margin-bottom: 18px; }
+.weekday-list, .frequency-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.weekday-row, .frequency-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.weekday-row.active, .frequency-row.active { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.weekday-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+.weekday-row.active .weekday-check {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+.field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+}
+.field-checkbox input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+/* Finish screen: diary log + goal status */
+.goal-status-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.goal-status-box p { margin: 2px 0; }
+.diary-log-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+.diary-log-check { color: var(--accent); width: 1.1em; height: 1.1em; }
+.diary-notes-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.see-entry-link { color: var(--accent); font-size: 0.9rem; font-weight: 600; }
+
+:root[data-theme="playful"] .goal-status-box,
+:root[data-theme="playful"] .home-goal-strip,
+:root[data-theme="playful"] .weekday-row,
+:root[data-theme="playful"] .frequency-row {
+  border-radius: 16px;
+}
+:root[data-theme="playful"] .goal-settings-sheet .goal-type-toggle { border-radius: 14px; }
 :root[data-theme="playful"] .workout-card:active { transform: scale(0.985); }
