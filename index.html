@@ -90,6 +90,14 @@
         </svg>
         <span>Customize</span>
       </button>
+      <button type="button" class="menu-item" id="exercise-library-btn">
+        <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+          <rect x="32" y="64" width="448" height="64" rx="12" />
+          <rect x="32" y="224" width="448" height="64" rx="12" />
+          <rect x="32" y="384" width="448" height="64" rx="12" />
+        </svg>
+        <span>Exercise Library</span>
+      </button>
       <button type="button" class="menu-item" id="export-all-btn">
         <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M384 192c53 0 96-43 96-96s-43-96-96-96-96 43-96 96c0 5.4 .5 10.8 1.3 16L159.6 184.1c-16.9-15-39.2-24.1-63.6-24.1-53 0-96 43-96 96s43 96 96 96c24.4 0 46.6-9.1 63.6-24.1L289.3 400c-.9 5.2-1.3 10.5-1.3 16 0 53 43 96 96 96s96-43 96-96-43-96-96-96c-24.4 0-46.6 9.1-63.6 24.1L190.7 272c.9-5.2 1.3-10.5 1.3-16s-.5-10.8-1.3-16l129.7-72.1c16.9 15 39.2 24.1 63.6 24.1z"/></svg>
         <span>Export all data</span>
@@ -98,7 +106,76 @@
         <svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M64 0C28.7 0 0 28.7 0 64l0 240 182.1 0-31-31c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l72 72c9.4 9.4 9.4 24.6 0 33.9l-72 72c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l31-31-182.1 0 0 96c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-277.5c0-17-6.7-33.3-18.7-45.3L258.7 18.7C246.7 6.7 230.5 0 213.5 0L64 0zM325.5 176L232 176c-13.3 0-24-10.7-24-24L208 58.5 325.5 176z"/></svg>
         <span>Import</span>
       </button>
+      <button type="button" class="menu-item" id="work-it-daily-link-btn">
+        <span class="icon menu-icon-emoji" aria-hidden="true">🔥</span>
+        <span>Work It Daily</span>
+      </button>
     </div>
+  </template>
+
+  <template id="tpl-promo-work-it-daily">
+    <div class="sheet confirm-sheet">
+      <h2 class="confirm-title">Work It Daily</h2>
+      <p class="confirm-message">Build a daily movement habit with Work It Daily — it's built on the exact same principle as this timer.</p>
+      <div class="form-actions">
+        <button type="button" class="text-btn secondary cancel-btn">Not now</button>
+        <a class="text-btn primary" href="https://work-it-daily.vercel.app" target="_blank" rel="noopener">Get the app</a>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-exercise-library">
+    <div class="sheet">
+      <header class="sheet-header">
+        <h2>Exercise Library</h2>
+        <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+      </header>
+      <div class="segmented tabs">
+        <button type="button" class="segmented-option tab-option active" data-tab="mine">My Intervals</button>
+        <button type="button" class="segmented-option tab-option" data-tab="classics">Classics</button>
+      </div>
+      <div class="tab-panel" id="mine-panel">
+        <div class="drawer-list" id="mine-list"></div>
+      </div>
+      <div class="tab-panel hidden" id="classics-panel">
+        <div class="drawer-list" id="classics-list"></div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-library-mine-item">
+    <article class="card interval-card">
+      <div class="card-main">
+        <h3 class="card-title"></h3>
+        <p class="card-meta"></p>
+      </div>
+      <div class="card-actions">
+        <button class="icon-btn edit-btn" aria-label="Edit" title="Edit"><svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M352.9 21.2L308 66.1 445.9 204 490.8 159.1C504.4 145.6 512 127.2 512 108s-7.6-37.6-21.2-51.1L455.1 21.2C441.6 7.6 423.2 0 404 0s-37.6 7.6-51.1 21.2zM274.1 100L58.9 315.1c-10.7 10.7-18.5 24.1-22.6 38.7L.9 481.6c-2.3 8.3 0 17.3 6.2 23.4s15.1 8.5 23.4 6.2l127.8-35.5c14.6-4.1 27.9-11.8 38.7-22.6L412 237.9 274.1 100z"/></svg></button>
+        <button class="icon-btn delete-btn" aria-label="Delete" title="Delete"><svg class="icon" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path d="M136.7 5.9C141.1-7.2 153.3-16 167.1-16l113.9 0c13.8 0 26 8.8 30.4 21.9L320 32 416 32c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 8.7-26.1zM32 144l384 0 0 304c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-304zm88 64c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24z"/></svg></button>
+      </div>
+    </article>
+  </template>
+
+  <template id="tpl-classics-section">
+    <div class="library-section">
+      <h3 class="library-section-title"></h3>
+      <div class="library-section-items"></div>
+    </div>
+  </template>
+
+  <template id="tpl-classics-item">
+    <article class="card interval-card classics-item">
+      <div class="card-main">
+        <h3 class="card-title"></h3>
+        <p class="card-meta"></p>
+      </div>
+      <div class="card-actions">
+        <button type="button" class="icon-btn add-btn" aria-label="Add to My Intervals" title="Add to My Intervals">
+          <svg class="icon add-icon" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path d="M256 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 160-160 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l160 0 0 160c0 17.7 14.3 32 32 32s32-14.3 32-32l0-160 160 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-160 0 0-160z"/></svg>
+          <svg class="icon added-icon hidden" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M470.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L192 338.7 425.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>
+        </button>
+      </div>
+    </article>
   </template>
 
   <template id="tpl-instructions">
@@ -326,9 +403,19 @@
         <h2>Add interval</h2>
         <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
       </header>
-      <button class="text-btn new-interval-btn">+ New interval</button>
-      <input type="text" class="drawer-search hidden" id="drawer-search" placeholder="Search saved intervals…" autocomplete="off" />
-      <div class="drawer-list" id="drawer-list"></div>
+      <div class="segmented tabs">
+        <button type="button" class="segmented-option tab-option active" data-tab="mine">My Intervals</button>
+        <button type="button" class="segmented-option tab-option" data-tab="classics">Classics</button>
+      </div>
+      <div class="tab-panel" id="picker-mine-panel">
+        <button class="text-btn new-interval-btn">+ New interval</button>
+        <input type="text" class="drawer-search hidden" id="drawer-search" placeholder="Search saved intervals…" autocomplete="off" />
+        <div class="drawer-list" id="drawer-list"></div>
+      </div>
+      <div class="tab-panel hidden" id="picker-classics-panel">
+        <input type="text" class="drawer-search hidden" id="classics-search" placeholder="Search Classics…" autocomplete="off" />
+        <div class="drawer-list" id="classics-drawer-list"></div>
+      </div>
     </div>
   </template>
 

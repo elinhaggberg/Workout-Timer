@@ -86,6 +86,10 @@ export function updateDrawerInterval(id, { name, type, amount }) {
   return drawer[idx];
 }
 
+export function deleteDrawerInterval(id) {
+  writeJSON(DRAWER_KEY, getDrawer().filter((d) => d.id !== id));
+}
+
 export function makeIntervalInstance({ name, type, amount, drawerId = null }) {
   return { id: uid(), name: name.trim(), type, amount, drawerId };
 }

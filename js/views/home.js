@@ -10,12 +10,18 @@ import {
   importData,
   getHomeTitle,
   setHomeTitle,
+  getDrawer,
+  upsertDrawerByName,
+  updateDrawerInterval,
+  deleteDrawerInterval,
 } from "../storage.js";
 import { workoutMeta, intervalMeta, setMeta, isSet, formatClock } from "../util.js";
 import { unlockAudio } from "../audio.js";
 import { openSheet } from "../sheet.js";
 import { shareOrDownload, filenameFor } from "../share.js";
 import { getTheme, setTheme } from "../theme.js";
+import { CLASSICS_CATEGORIES, classicsByCategory } from "../exerciseLibrary.js";
+import { initTabs } from "../tabs.js";
 
 export function renderHome(root, nav) {
   const tpl = document.getElementById("tpl-home");
@@ -133,6 +139,149 @@ export function renderHome(root, nav) {
       sheet.close();
       openImport();
     });
+    sheet.el.querySelector("#exercise-library-btn").addEventListener("click", () => {
+      sheet.close();
+      openExerciseLibrary();
+    });
+    sheet.el.querySelector("#work-it-daily-link-btn").addEventListener("click", () => {
+      sheet.close();
+      openWorkItDailyPromo();
+    });
+  }
+
+  function openWorkItDailyPromo() {
+    const sheet = openSheet("tpl-promo-work-it-daily");
+    sheet.el.querySelector(".cancel-btn").addEventListener("click", () => sheet.close());
+  }
+
+  function openExerciseLibrary() {
+    const sheet = openSheet("tpl-exercise-library");
+    sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+
+    const mineListEl = sheet.el.querySelector("#mine-list");
+    const classicsListEl = sheet.el.querySelector("#classics-list");
+
+    function renderMine() {
+      const drawer = getDrawer().sort((a, b) => a.name.localeCompare(b.name));
+      if (drawer.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty-state";
+        empty.textContent = "No saved intervals yet.";
+        mineListEl.replaceChildren(empty);
+        return;
+      }
+      const itemTpl = document.getElementById("tpl-library-mine-item");
+      const nodes = drawer.map((entry) => {
+        const node = itemTpl.content.cloneNode(true);
+        node.querySelector(".card-title").textContent = entry.name;
+        node.querySelector(".card-meta").textContent = intervalMeta(entry);
+        node.querySelector(".edit-btn").addEventListener("click", () => openDrawerEntryForm(entry));
+        node.querySelector(".delete-btn").addEventListener("click", () => confirmDeleteDrawerEntry(entry));
+        return node;
+      });
+      mineListEl.replaceChildren(...nodes);
+    }
+
+    function renderClassics() {
+      const drawerNames = new Set(getDrawer().map((d) => d.name.trim().toLowerCase()));
+      const sectionTpl = document.getElementById("tpl-classics-section");
+      const itemTpl = document.getElementById("tpl-classics-item");
+      const sections = CLASSICS_CATEGORIES.map((cat) => {
+        const section = sectionTpl.content.cloneNode(true);
+        section.querySelector(".library-section-title").textContent = cat.label;
+        const itemsEl = section.querySelector(".library-section-items");
+        const items = classicsByCategory(cat.id).map((entry) => {
+          const node = itemTpl.content.cloneNode(true);
+          node.querySelector(".card-title").textContent = entry.name;
+          node.querySelector(".card-meta").textContent = intervalMeta(entry);
+          const btn = node.querySelector(".add-btn");
+          const added = drawerNames.has(entry.name.trim().toLowerCase());
+          btn.classList.toggle("added", added);
+          btn.querySelector(".add-icon").classList.toggle("hidden", added);
+          btn.querySelector(".added-icon").classList.toggle("hidden", !added);
+          btn.setAttribute("aria-label", added ? "Added to My Intervals" : "Add to My Intervals");
+          btn.addEventListener("click", () => {
+            upsertDrawerByName({ name: entry.name, type: entry.type, amount: entry.amount });
+            renderClassics();
+            renderMine();
+          });
+          return node;
+        });
+        itemsEl.replaceChildren(...items);
+        return section;
+      });
+      classicsListEl.replaceChildren(...sections);
+    }
+
+    function openDrawerEntryForm(entry) {
+      const formSheet = openSheet("tpl-interval-form");
+      const form = formSheet.el.querySelector("#interval-form");
+      const titleEl = formSheet.el.querySelector(".form-title");
+      const durationField = formSheet.el.querySelector("#duration-field");
+      const repsField = formSheet.el.querySelector("#reps-field");
+      const segButtons = [...formSheet.el.querySelectorAll(".segmented-option")];
+      formSheet.el.querySelector("#update-saved-btn").remove();
+
+      titleEl.textContent = "Edit interval";
+      let currentType = entry.type;
+      form.name.value = entry.name;
+      if (entry.type === "timer") {
+        form["amount-min"].value = Math.floor(entry.amount / 60);
+        form["amount-sec"].value = entry.amount % 60;
+      } else {
+        form.amount.value = entry.amount;
+      }
+      applyType(currentType);
+
+      segButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          currentType = btn.dataset.type;
+          applyType(currentType);
+        });
+      });
+
+      function applyType(type) {
+        segButtons.forEach((b) => b.classList.toggle("active", b.dataset.type === type));
+        durationField.classList.toggle("hidden", type !== "timer");
+        repsField.classList.toggle("hidden", type !== "reps");
+      }
+
+      formSheet.el.querySelector(".close-btn").addEventListener("click", () => formSheet.close());
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = form.name.value.trim();
+        const amount =
+          currentType === "timer"
+            ? (Number(form["amount-min"].value) || 0) * 60 + (Number(form["amount-sec"].value) || 0)
+            : Number(form.amount.value);
+        if (!name || !amount || amount <= 0) return;
+        updateDrawerInterval(entry.id, { name, type: currentType, amount });
+        formSheet.close();
+        renderMine();
+      });
+
+      form.name.focus();
+    }
+
+    function confirmDeleteDrawerEntry(entry) {
+      const confirmSheet = openSheet("tpl-confirm-delete");
+      confirmSheet.el.querySelector(".confirm-title").textContent = "Delete interval?";
+      confirmSheet.el.querySelector(".confirm-message").textContent = `Delete "${entry.name}"? This can't be undone.`;
+      confirmSheet.el.querySelector(".cancel-btn").addEventListener("click", () => confirmSheet.close());
+      confirmSheet.el.querySelector(".confirm-btn").addEventListener("click", () => {
+        deleteDrawerInterval(entry.id);
+        confirmSheet.close();
+        renderMine();
+      });
+    }
+
+    initTabs(sheet.el, {
+      mine: sheet.el.querySelector("#mine-panel"),
+      classics: sheet.el.querySelector("#classics-panel"),
+    });
+
+    renderMine();
+    renderClassics();
   }
 
   function openInstructions() {
