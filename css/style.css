@@ -899,6 +899,7 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   border-radius: var(--radius);
   text-align: left;
 }
+.home-goal-icon { width: 1.2em; height: 1.2em; color: var(--accent); flex-shrink: 0; }
 .home-goal-label { font-size: 0.88rem; font-weight: 600; flex-shrink: 0; }
 .home-goal-progress-bar {
   flex: 1;
@@ -1060,4 +1061,10 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   border-radius: 16px;
 }
 :root[data-theme="playful"] .goal-settings-sheet .goal-type-toggle { border-radius: 14px; }
+
+/* The goal progress track otherwise blends into the tinted card behind it,
+   same issue (and same fix) as the rounds stepper on a Set card. */
+:root[data-theme="playful"] .goal-progress-bar {
+  background: color-mix(in srgb, black 12%, var(--card-tint));
+}
 :root[data-theme="playful"] .workout-card:active { transform: scale(0.985); }
