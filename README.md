@@ -18,7 +18,7 @@ No build step — plain HTML/CSS/JS modules. All data lives in `localStorage` on
 
 ## Deploying
 
-Deployed via the included GitHub Actions workflow (`.github/workflows/deploy.yml`) to GitHub Pages on every push to `main` — no build step, no configuration needed.
+Deploy straight from this repo on [Vercel](https://vercel.com) — no configuration needed, no build step.
 
 ## License
 
