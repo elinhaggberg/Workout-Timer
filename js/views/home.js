@@ -382,7 +382,10 @@ export function renderHome(root, nav) {
       }
       try {
         const result = importData(parsed);
-        messageEl.textContent = `Imported ${result.workoutCount} workout${result.workoutCount !== 1 ? "s" : ""}.`;
+        const parts = [`${result.workoutCount} workout${result.workoutCount !== 1 ? "s" : ""}`];
+        if (result.goalCount > 0) parts.push(`${result.goalCount} goal${result.goalCount !== 1 ? "s" : ""}`);
+        if (result.diaryCount > 0) parts.push(`${result.diaryCount} diary entr${result.diaryCount !== 1 ? "ies" : "y"}`);
+        messageEl.textContent = `Imported ${parts.join(", ")}${result.preferencesApplied ? " and restored your theme/settings" : ""}.`;
         renderList();
         setTimeout(() => sheet.close(), 900);
       } catch (err) {

@@ -132,6 +132,13 @@ export function exportBackupData() {
     exportedAt: new Date().toISOString(),
     workouts: getWorkouts(),
     drawer: getDrawer(),
+    goals: getGoals(),
+    diary: getDiaryEntries(),
+    preferences: {
+      theme: getThemePref(),
+      homeTitle: getHomeTitle(),
+      soundEnabled: getSoundEnabled(),
+    },
   };
 }
 
@@ -172,7 +179,43 @@ export function importData(data) {
 
   writeJSON(WORKOUTS_KEY, [...getWorkouts(), ...newWorkouts]);
 
-  return { workoutCount: newWorkouts.length, drawerCount: importedDrawer.length };
+  // Goals and diary entries are self-contained (no cross-references to
+  // remap, unlike intervals/drawer), so importing them is just appending
+  // with fresh ids -- same "always add, never overwrite" rule as workouts.
+  const importedGoals = Array.isArray(data.goals) ? data.goals : [];
+  if (importedGoals.length > 0) {
+    const newGoals = importedGoals.map((g) => ({ ...g, id: uid() }));
+    writeJSON(GOALS_KEY, [...getGoals(), ...newGoals]);
+  }
+
+  const importedDiary = Array.isArray(data.diary) ? data.diary : [];
+  if (importedDiary.length > 0) {
+    const newDiary = importedDiary.map((e) => ({ ...e, id: uid() }));
+    writeJSON(DIARY_KEY, [...getDiaryEntries(), ...newDiary]);
+  }
+
+  // Preferences are current-state settings, not a list, so restoring a full
+  // backup applies them directly rather than merging -- that's what "restore
+  // my backup" means for a device's theme/title/sound. Only full backups
+  // carry this (a single shared workout shouldn't repaint the recipient's
+  // app), and only fields actually present in the file are touched, so an
+  // older export missing `preferences` leaves everything as-is.
+  let preferencesApplied = false;
+  if (data.type === "backup" && data.preferences) {
+    const { theme, homeTitle, soundEnabled } = data.preferences;
+    if (theme) setThemePref(theme);
+    if (homeTitle) setHomeTitle(homeTitle);
+    if (typeof soundEnabled === "boolean") setSoundEnabled(soundEnabled);
+    preferencesApplied = true;
+  }
+
+  return {
+    workoutCount: newWorkouts.length,
+    drawerCount: importedDrawer.length,
+    goalCount: importedGoals.length,
+    diaryCount: importedDiary.length,
+    preferencesApplied,
+  };
 }
 
 // ---- Preferences ----
