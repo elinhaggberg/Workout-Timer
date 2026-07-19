@@ -899,6 +899,18 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 :root[data-theme="playful"] .theme-option:active { transform: scale(0.96); }
 
 /* Home screen goal strip */
+/* Backup reminder banner */
+.banner {
+  margin: 0 16px 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+.banner p { margin: 0 0 10px; font-size: 0.9rem; }
+.banner-actions { display: flex; gap: 8px; }
+.banner-actions .text-btn { padding: 6px 12px; font-size: 0.85rem; }
+
 .home-goal-strip {
   display: flex;
   align-items: center;

@@ -31,6 +31,13 @@
       <h1 id="home-title">Workouts</h1>
       <button class="icon-btn settings-btn" id="settings-btn" aria-label="Menu"><svg class="icon" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><rect x="0" y="56" width="448" height="56" rx="16"/><rect x="0" y="228" width="448" height="56" rx="16"/><rect x="0" y="400" width="448" height="56" rx="16"/></svg></button>
     </header>
+    <div id="backup-banner" class="banner hidden">
+      <p>You haven't backed up in a while — export takes a second.</p>
+      <div class="banner-actions">
+        <button type="button" class="text-btn primary" id="backup-now-btn">Back up now</button>
+        <button type="button" class="text-btn" id="backup-dismiss-btn">Later</button>
+      </div>
+    </div>
     <button type="button" class="home-goal-strip hidden" id="home-goal-strip">
       <svg class="icon home-goal-icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
         <circle cx="256" cy="256" r="200" fill="none" stroke="currentColor" stroke-width="32" />
