@@ -152,13 +152,15 @@
     </div>
   </template>
 
-  <template id="tpl-backup-improved">
-    <div class="sheet confirm-sheet">
-      <h2 class="confirm-title">Backups just got better</h2>
-      <p class="confirm-message">Your backup now also includes your goals, workout diary, and theme/settings — not just workouts. If you've exported a backup before, it's worth making a fresh one.</p>
+  <template id="tpl-whats-new">
+    <div class="sheet">
+      <header class="sheet-header">
+        <h2>What's new</h2>
+        <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+      </header>
+      <div class="whats-new-body" id="whats-new-body"></div>
       <div class="form-actions">
-        <button type="button" class="text-btn secondary backup-improved-later-btn">Later</button>
-        <button type="button" class="text-btn primary backup-improved-export-btn">Export a fresh backup</button>
+        <button type="button" class="text-btn primary" id="whats-new-got-it-btn">Got it</button>
       </div>
     </div>
   </template>

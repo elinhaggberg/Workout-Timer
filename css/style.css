@@ -542,6 +542,17 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 .instructions-body section p + p { margin-top: 8px; }
 .instructions-body strong { color: var(--text); }
 
+/* What's new */
+.whats-new-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 8px;
+}
+.whats-new-body section h3 { font-size: 0.95rem; color: var(--text-dim); margin-bottom: 8px; }
+.whats-new-body section ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+.whats-new-body section li { font-size: 0.95rem; line-height: 1.45; }
+
 /* Customize sheet */
 .home-title-field { margin: 4px 0 20px; }
 

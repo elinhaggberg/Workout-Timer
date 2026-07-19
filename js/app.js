@@ -5,6 +5,7 @@ import { renderFinish } from "./views/finish.js";
 import { renderDiary } from "./views/diary.js";
 import { renderGoals } from "./views/goals.js";
 import { applyTheme } from "./theme.js";
+import { checkWhatsNew } from "./whatsNew.js";
 
 applyTheme();
 
@@ -81,6 +82,7 @@ function route() {
 
 window.addEventListener("hashchange", route);
 route();
+checkWhatsNew();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
