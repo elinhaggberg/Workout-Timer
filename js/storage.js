@@ -5,6 +5,7 @@ const THEME_KEY = "wt_theme_v1";
 const HOME_TITLE_KEY = "wt_home_title_v1";
 const DIARY_KEY = "wt_diary_v1";
 const GOALS_KEY = "wt_goals_v1";
+const BACKUP_NOTICE_KEY = "wt_backup_notice_v1";
 
 function uid() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -306,6 +307,17 @@ export function updateGoal(id, patch) {
 
 export function deleteGoal(id) {
   writeJSON(GOALS_KEY, getGoals().filter((g) => g.id !== id));
+}
+
+// One-time notice shown after the backup fix that added goals/diary/theme/
+// title/sound to exportBackupData -- lets an existing user know their old
+// backup files are missing that data, so it's worth making a fresh one.
+export function getBackupNoticeSeen() {
+  return localStorage.getItem(BACKUP_NOTICE_KEY) === "true";
+}
+
+export function setBackupNoticeSeen() {
+  localStorage.setItem(BACKUP_NOTICE_KEY, "true");
 }
 
 export { uid };

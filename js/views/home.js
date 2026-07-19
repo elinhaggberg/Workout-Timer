@@ -15,6 +15,8 @@ import {
   updateDrawerInterval,
   deleteDrawerInterval,
   getGoals,
+  getBackupNoticeSeen,
+  setBackupNoticeSeen,
 } from "../storage.js";
 import { workoutMeta, intervalMeta, setMeta, isSet, formatClock } from "../util.js";
 import { unlockAudio } from "../audio.js";
@@ -40,6 +42,25 @@ export function renderHome(root, nav) {
 
   renderGoalStrip();
   renderList();
+  maybeShowBackupImprovedNotice();
+
+  // One-time notice after the backup fix that added goals/diary/theme/title/
+  // sound to the export -- a fresh install has nothing worth re-backing up,
+  // so it's marked seen silently instead of greeting a new user with it.
+  function maybeShowBackupImprovedNotice() {
+    if (getBackupNoticeSeen()) return;
+    setBackupNoticeSeen();
+    if (getWorkouts().length === 0) return;
+
+    const sheet = openSheet("tpl-backup-improved");
+    sheet.el.querySelector(".backup-improved-later-btn").addEventListener("click", () => sheet.close());
+    sheet.el.querySelector(".backup-improved-export-btn").addEventListener("click", async () => {
+      const data = exportBackupData();
+      const stamp = new Date().toISOString().slice(0, 10);
+      await shareOrDownload(`workout-timer-backup-${stamp}.json`, JSON.stringify(data, null, 2));
+      sheet.close();
+    });
+  }
 
   function renderGoalStrip() {
     const strip = document.getElementById("home-goal-strip");
