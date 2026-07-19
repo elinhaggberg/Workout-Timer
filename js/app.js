@@ -6,6 +6,7 @@ import { renderDiary } from "./views/diary.js";
 import { renderGoals } from "./views/goals.js";
 import { applyTheme } from "./theme.js";
 import { checkWhatsNew } from "./whatsNew.js";
+import { checkOnboarding } from "./onboarding.js";
 
 applyTheme();
 
@@ -82,6 +83,7 @@ function route() {
 
 window.addEventListener("hashchange", route);
 route();
+checkOnboarding();
 checkWhatsNew();
 
 if ("serviceWorker" in navigator) {

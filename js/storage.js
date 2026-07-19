@@ -9,6 +9,7 @@ const LAST_SEEN_VERSION_KEY = "wt_last_seen_version_v1";
 const LAST_BACKUP_KEY = "wt_last_backup_at_v1";
 const BACKUP_BANNER_DISMISSED_KEY = "wt_backup_banner_dismissed_at_v1";
 const FIRST_OPEN_KEY = "wt_first_open_at_v1";
+const ONBOARDING_SEEN_KEY = "wt_onboarding_seen_v1";
 
 function uid() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -356,6 +357,14 @@ export function shouldShowBackupBanner() {
   if (dismissedAt && Date.now() - dismissedAt < BACKUP_SNOOZE_MS) return false;
 
   return true;
+}
+
+export function getOnboardingSeen() {
+  return localStorage.getItem(ONBOARDING_SEEN_KEY) === "true";
+}
+
+export function setOnboardingSeen() {
+  localStorage.setItem(ONBOARDING_SEEN_KEY, "true");
 }
 
 export { uid };
