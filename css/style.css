@@ -272,6 +272,14 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
   padding: 14px;
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
 }
+
+/* Rest cards get the same accent-tinted border as a Set, plus a light fill,
+   so the pre-made Rest interval reads as visually distinct wherever it's
+   listed (workout editor, interval picker, Exercise Library, preview). */
+.rest-card {
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
 .set-header {
   display: flex;
   align-items: center;
@@ -304,6 +312,9 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 .set-intervals .interval-card {
   background: var(--surface-2);
   padding: 10px 12px;
+}
+.set-intervals .interval-card.rest-card {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
 }
 .add-to-set-btn {
   align-self: flex-start;
@@ -378,6 +389,17 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
    unrelated color. */
 :root[data-theme="playful"] .rounds-stepper {
   background: color-mix(in srgb, black 12%, var(--card-tint));
+}
+
+/* Every card is already accent-tinted in Playful, so the Rest card needs a
+   stronger dose of the same tint (plus the Set-style border) to still read
+   as distinct rather than disappearing into the rest of the list. */
+:root[data-theme="playful"] .card.rest-card {
+  background: color-mix(in srgb, black 8%, var(--card-tint));
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+:root[data-theme="playful"] .set-intervals .interval-card.rest-card {
+  background: color-mix(in srgb, black 8%, var(--card-tint));
 }
 
 .drawer-item {
@@ -622,11 +644,15 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 }
 .import-message.error { color: var(--danger); }
 
-.new-interval-btn {
+.new-interval-btn, .add-rest-btn {
+  display: block;
+  width: 100%;
   text-align: left;
   color: var(--accent);
   font-weight: 600;
   padding: 12px 4px;
+}
+.add-rest-btn {
   border-bottom: 1px solid var(--border);
   margin-bottom: 10px;
 }

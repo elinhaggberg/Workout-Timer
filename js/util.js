@@ -16,6 +16,13 @@ export function isSet(node) {
   return !!node && node.kind === "set";
 }
 
+// Pins the Rest preset above every other saved interval, alphabetical among
+// themselves either side of it -- used anywhere the drawer's "My Intervals"
+// list is shown (the interval picker and the Exercise Library).
+export function sortDrawerRestFirst(drawer) {
+  return [...drawer].sort((a, b) => (b.isRest ? 1 : 0) - (a.isRest ? 1 : 0) || a.name.localeCompare(b.name));
+}
+
 // Expands set containers into their repeated intervals, in play order.
 export function flattenNodes(nodes) {
   const flat = [];

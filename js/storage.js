@@ -73,12 +73,12 @@ export function findDrawerByName(name) {
 
 // Ensures a drawer entry exists for this name; creates one if not found.
 // Returns the drawer entry (existing or new).
-export function upsertDrawerByName({ name, type, amount }) {
+export function upsertDrawerByName({ name, type, amount, isRest = false }) {
   const drawer = getDrawer();
   const norm = name.trim().toLowerCase();
   const existing = drawer.find((d) => d.name.trim().toLowerCase() === norm);
   if (existing) return existing;
-  const entry = { id: uid(), name: name.trim(), type, amount, updatedAt: Date.now() };
+  const entry = { id: uid(), name: name.trim(), type, amount, isRest, updatedAt: Date.now() };
   drawer.push(entry);
   writeJSON(DRAWER_KEY, drawer);
   return entry;
@@ -97,8 +97,21 @@ export function deleteDrawerInterval(id) {
   writeJSON(DRAWER_KEY, getDrawer().filter((d) => d.id !== id));
 }
 
-export function makeIntervalInstance({ name, type, amount, drawerId = null }) {
-  return { id: uid(), name: name.trim(), type, amount, drawerId };
+// The pre-made Rest interval is found by its isRest flag rather than by
+// name, so renaming it (e.g. to another language) doesn't spawn a second
+// copy the next time it's added to a workout.
+export function getOrCreateRestDrawerEntry() {
+  const existing = getDrawer().find((d) => d.isRest);
+  if (existing) return existing;
+  const entry = { id: uid(), name: "Rest", type: "timer", amount: 30, isRest: true, updatedAt: Date.now() };
+  const drawer = getDrawer();
+  drawer.push(entry);
+  writeJSON(DRAWER_KEY, drawer);
+  return entry;
+}
+
+export function makeIntervalInstance({ name, type, amount, drawerId = null, isRest = false }) {
+  return { id: uid(), name: name.trim(), type, amount, drawerId, isRest };
 }
 
 export function makeSetContainer({ rounds = 2 } = {}) {
@@ -160,7 +173,7 @@ export function importData(data) {
   const importedDrawer = Array.isArray(data.drawer) ? data.drawer : [];
   const oldIdToLocalId = new Map();
   for (const entry of importedDrawer) {
-    const local = upsertDrawerByName({ name: entry.name, type: entry.type, amount: entry.amount });
+    const local = upsertDrawerByName({ name: entry.name, type: entry.type, amount: entry.amount, isRest: entry.isRest });
     oldIdToLocalId.set(entry.id, local.id);
   }
 

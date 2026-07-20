@@ -18,8 +18,9 @@ import {
   markBackedUp,
   dismissBackupBanner,
   shouldShowBackupBanner,
+  getSoundEnabled,
 } from "../storage.js";
-import { workoutMeta, intervalMeta, setMeta, isSet, formatClock } from "../util.js";
+import { workoutMeta, intervalMeta, setMeta, isSet, formatClock, sortDrawerRestFirst } from "../util.js";
 import { unlockAudio } from "../audio.js";
 import { openSheet } from "../sheet.js";
 import { shareOrDownload, filenameFor } from "../share.js";
@@ -126,8 +127,10 @@ export function renderHome(root, nav) {
   function startWorkout(workoutId) {
     // Create/resume the AudioContext synchronously within this click's user
     // gesture, since the player starts playing immediately once it mounts
-    // (rather than waiting for a separate tap there).
-    unlockAudio();
+    // (rather than waiting for a separate tap there). Skipped entirely when
+    // sound is off — priming still calls the real iOS audio APIs even at
+    // zero volume, which is audible as a faint click/pop on some devices.
+    if (getSoundEnabled()) unlockAudio();
     nav.toPlayer(workoutId);
   }
 
@@ -145,7 +148,7 @@ export function renderHome(root, nav) {
 
       const set = makeSetContainer({ rounds });
       set.intervals.push(makeIntervalInstance({ name: "Work", type: "timer", amount: work }));
-      if (rest > 0) set.intervals.push(makeIntervalInstance({ name: "Rest", type: "timer", amount: rest }));
+      if (rest > 0) set.intervals.push(makeIntervalInstance({ name: "Rest", type: "timer", amount: rest, isRest: true }));
 
       const workout = {
         id: uid(),
@@ -154,7 +157,7 @@ export function renderHome(root, nav) {
         intervals: [set],
       };
 
-      unlockAudio();
+      if (getSoundEnabled()) unlockAudio();
       sheet.close();
       nav.toPlayerAdhoc(workout);
     });
@@ -210,7 +213,7 @@ export function renderHome(root, nav) {
     const classicsListEl = sheet.el.querySelector("#classics-list");
 
     function renderMine() {
-      const drawer = getDrawer().sort((a, b) => a.name.localeCompare(b.name));
+      const drawer = sortDrawerRestFirst(getDrawer());
       if (drawer.length === 0) {
         const empty = document.createElement("p");
         empty.className = "empty-state";
@@ -221,6 +224,7 @@ export function renderHome(root, nav) {
       const itemTpl = document.getElementById("tpl-library-mine-item");
       const nodes = drawer.map((entry) => {
         const node = itemTpl.content.cloneNode(true);
+        node.querySelector(".interval-card").classList.toggle("rest-card", !!entry.isRest);
         node.querySelector(".card-title").textContent = entry.name;
         node.querySelector(".card-meta").textContent = intervalMeta(entry);
         node.querySelector(".edit-btn").addEventListener("click", () => openDrawerEntryForm(entry));
@@ -488,7 +492,7 @@ export function renderHome(root, nav) {
 
   function renderPreviewInterval(interval) {
     const card = document.createElement("div");
-    card.className = "card interval-card preview-card";
+    card.className = "card interval-card preview-card" + (interval.isRest ? " rest-card" : "");
     const main = document.createElement("div");
     main.className = "card-main";
     const title = document.createElement("h3");

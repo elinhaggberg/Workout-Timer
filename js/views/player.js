@@ -58,9 +58,12 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
   renderSoundToggle();
 
   if (isAdhoc) {
-    // Prime audio before the very first interval-start beep, since there's
-    // no lead-in countdown here for togglePlay()'s usual unlock to precede it.
-    audio.unlockAudio();
+    // Prime audio before the very first beep, since there's no lead-in
+    // countdown here for togglePlay()'s usual unlock to precede it. Only
+    // when sound is actually on — priming still calls the real iOS audio
+    // APIs even at zero volume, which is audible as a faint click/pop on
+    // some devices regardless of the JS-level volume.
+    if (audio.isEnabled()) audio.unlockAudio();
     state.started = true;
   }
   enterInterval(0);
@@ -74,7 +77,7 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
 
   function togglePlay() {
     if (!state.started) {
-      audio.unlockAudio();
+      if (audio.isEnabled()) audio.unlockAudio();
       state.started = true;
     }
     state.running = !state.running;
@@ -124,7 +127,17 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
       if (interval.type === "timer") {
         state.remaining -= 1;
         if (state.remaining > 0) {
-          if (state.remaining <= WARNING_SECONDS) audio.countdownTick();
+          if (state.remaining === 1) {
+            // Last beep of the outgoing countdown doubles as the cue for
+            // what's coming next — high for a normal interval ("go"), low
+            // heading into a Rest block — so nothing extra needs to play
+            // once the next interval actually starts.
+            const next = sequence[state.index + 1];
+            if (next && next.isRest) audio.countdownFinalLow();
+            else audio.countdownFinalHigh();
+          } else if (state.remaining <= WARNING_SECONDS) {
+            audio.countdownTick();
+          }
         } else {
           advance();
           render();
@@ -137,7 +150,6 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
   }
 
   function enterActivePhase() {
-    audio.intervalStart();
     state.phase = "active";
     const interval = currentInterval();
     state.remaining = interval.type === "timer" ? interval.amount : interval.amount;
@@ -145,7 +157,9 @@ export function renderPlayer(root, nav, workoutId, adhocWorkout) {
 
   function enterInterval(index) {
     state.index = index;
-    if (isAdhoc) {
+    // Rest blocks (like the Tabata quick-timer's rest phase) start right
+    // away too — the "get ready" pause is only useful before work.
+    if (isAdhoc || sequence[index].isRest) {
       enterActivePhase();
     } else {
       state.phase = "countdown";

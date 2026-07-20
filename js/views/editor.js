@@ -9,8 +9,9 @@ import {
   makeSetContainer,
   uid,
   exportWorkoutData,
+  getOrCreateRestDrawerEntry,
 } from "../storage.js";
-import { intervalMeta, isSet, setMeta } from "../util.js";
+import { intervalMeta, isSet, setMeta, sortDrawerRestFirst } from "../util.js";
 import { openSheet } from "../sheet.js";
 import { shareOrDownload, filenameFor } from "../share.js";
 import { CLASSICS } from "../exerciseLibrary.js";
@@ -114,6 +115,7 @@ export function renderEditor(root, nav, workoutId) {
     const card = frag.querySelector(".interval-card");
     const handle = frag.querySelector(".drag-handle");
     card.dataset.id = interval.id;
+    card.classList.toggle("rest-card", !!interval.isRest);
     frag.querySelector(".card-title").textContent = interval.name;
     frag.querySelector(".card-meta").textContent = intervalMeta(interval);
     frag.querySelector(".duplicate-btn").addEventListener("click", onDuplicate);
@@ -287,6 +289,19 @@ export function renderEditor(root, nav, workoutId) {
     document.addEventListener("pointercancel", onUp);
   }
 
+  function addRestInterval(targetArray) {
+    const drawerEntry = getOrCreateRestDrawerEntry();
+    const instance = makeIntervalInstance({
+      name: drawerEntry.name,
+      type: drawerEntry.type,
+      amount: drawerEntry.amount,
+      drawerId: drawerEntry.id,
+      isRest: true,
+    });
+    targetArray.push(instance);
+    return instance;
+  }
+
   function openAddChoice(targetArray) {
     const sheet = openSheet("tpl-add-choice");
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
@@ -300,11 +315,16 @@ export function renderEditor(root, nav, workoutId) {
       targetArray.push(newSet);
       renderIntervalList(newSet.id);
     });
+    sheet.el.querySelector("#choice-rest").addEventListener("click", () => {
+      sheet.close();
+      const instance = addRestInterval(targetArray);
+      renderIntervalList(instance.id);
+    });
   }
 
   function openPicker(targetArray) {
     const sheet = openSheet("tpl-interval-picker");
-    const drawer = getDrawer().sort((a, b) => a.name.localeCompare(b.name));
+    const drawer = sortDrawerRestFirst(getDrawer());
     const listEl = sheet.el.querySelector("#drawer-list");
     const searchInput = sheet.el.querySelector("#drawer-search");
     const classicsListEl = sheet.el.querySelector("#classics-drawer-list");
@@ -335,6 +355,7 @@ export function renderEditor(root, nav, workoutId) {
       const itemTpl = document.getElementById("tpl-drawer-item");
       const nodes = matches.map((entry) => {
         const node = itemTpl.content.cloneNode(true);
+        node.querySelector(".drawer-item").classList.toggle("rest-card", !!entry.isRest);
         node.querySelector(".card-title").textContent = entry.name;
         node.querySelector(".card-meta").textContent = intervalMeta(entry);
         node.querySelector("button").addEventListener("click", () => {
@@ -343,6 +364,7 @@ export function renderEditor(root, nav, workoutId) {
             type: entry.type,
             amount: entry.amount,
             drawerId: entry.id,
+            isRest: entry.isRest,
           });
           targetArray.push(instance);
           sheet.close();
@@ -401,6 +423,11 @@ export function renderEditor(root, nav, workoutId) {
     sheet.el.querySelector(".new-interval-btn").addEventListener("click", () => {
       sheet.close();
       openIntervalForm({ mode: "create", targetArray });
+    });
+    sheet.el.querySelector(".add-rest-btn").addEventListener("click", () => {
+      const instance = addRestInterval(targetArray);
+      sheet.close();
+      renderIntervalList(instance.id);
     });
   }
 

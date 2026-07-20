@@ -128,18 +128,28 @@ function primeTone(key, freq, duration, options) {
 export function unlockAudio() {
   play("unlock", () => renderToneWav(440, 0.05, { volume: 0 }));
   primeTone("countdownTick", 880, 0.12, { type: "square", volume: 0.3 });
-  primeTone("intervalStart", 1320, 0.18, { type: "square", volume: 0.4 });
+  primeTone("countdownFinalHigh", 1320, 0.18, { type: "square", volume: 0.4 });
+  primeTone("countdownFinalLow", 550, 0.18, { type: "square", volume: 0.4 });
   primeTone("intervalEnd", 660, 0.15, { type: "sine", volume: 0.3 });
 }
 
-// Short low blip used during the 3-2-1 countdown.
+// First two beeps of the 3-beep countdown that plays during an interval's
+// final 3 seconds, regardless of what comes next.
 export function countdownTick() {
   tone("countdownTick", 880, 0.12, { type: "square", volume: 0.3 });
 }
 
-// Higher double-beep marking the start of a work interval ("go").
-export function intervalStart() {
-  tone("intervalStart", 1320, 0.18, { type: "square", volume: 0.4 });
+// Final, higher-pitched beep of that countdown — the next interval is a
+// normal work interval ("go"). This doubles as the only "interval started"
+// cue, so nothing else plays once the next interval actually begins.
+export function countdownFinalHigh() {
+  tone("countdownFinalHigh", 1320, 0.18, { type: "square", volume: 0.4 });
+}
+
+// Final, lower-pitched beep of that countdown — the next interval is a
+// Rest block ("ease up").
+export function countdownFinalLow() {
+  tone("countdownFinalLow", 550, 0.18, { type: "square", volume: 0.4 });
 }
 
 // Soft single tone marking rest/reps-complete transitions.
