@@ -9,6 +9,7 @@ import {
   makeSetContainer,
   uid,
   exportWorkoutData,
+  getOrCreateRestDrawerEntry,
 } from "../storage.js";
 import { intervalMeta, isSet, setMeta } from "../util.js";
 import { openSheet } from "../sheet.js";
@@ -343,6 +344,7 @@ export function renderEditor(root, nav, workoutId) {
             type: entry.type,
             amount: entry.amount,
             drawerId: entry.id,
+            isRest: entry.isRest,
           });
           targetArray.push(instance);
           sheet.close();
@@ -401,6 +403,19 @@ export function renderEditor(root, nav, workoutId) {
     sheet.el.querySelector(".new-interval-btn").addEventListener("click", () => {
       sheet.close();
       openIntervalForm({ mode: "create", targetArray });
+    });
+    sheet.el.querySelector(".add-rest-btn").addEventListener("click", () => {
+      const drawerEntry = getOrCreateRestDrawerEntry();
+      const instance = makeIntervalInstance({
+        name: drawerEntry.name,
+        type: drawerEntry.type,
+        amount: drawerEntry.amount,
+        drawerId: drawerEntry.id,
+        isRest: true,
+      });
+      targetArray.push(instance);
+      sheet.close();
+      renderIntervalList(instance.id);
     });
   }
 

@@ -18,6 +18,7 @@ import {
   markBackedUp,
   dismissBackupBanner,
   shouldShowBackupBanner,
+  getSoundEnabled,
 } from "../storage.js";
 import { workoutMeta, intervalMeta, setMeta, isSet, formatClock } from "../util.js";
 import { unlockAudio } from "../audio.js";
@@ -126,8 +127,10 @@ export function renderHome(root, nav) {
   function startWorkout(workoutId) {
     // Create/resume the AudioContext synchronously within this click's user
     // gesture, since the player starts playing immediately once it mounts
-    // (rather than waiting for a separate tap there).
-    unlockAudio();
+    // (rather than waiting for a separate tap there). Skipped entirely when
+    // sound is off — priming still calls the real iOS audio APIs even at
+    // zero volume, which is audible as a faint click/pop on some devices.
+    if (getSoundEnabled()) unlockAudio();
     nav.toPlayer(workoutId);
   }
 
@@ -145,7 +148,7 @@ export function renderHome(root, nav) {
 
       const set = makeSetContainer({ rounds });
       set.intervals.push(makeIntervalInstance({ name: "Work", type: "timer", amount: work }));
-      if (rest > 0) set.intervals.push(makeIntervalInstance({ name: "Rest", type: "timer", amount: rest }));
+      if (rest > 0) set.intervals.push(makeIntervalInstance({ name: "Rest", type: "timer", amount: rest, isRest: true }));
 
       const workout = {
         id: uid(),
@@ -154,7 +157,7 @@ export function renderHome(root, nav) {
         intervals: [set],
       };
 
-      unlockAudio();
+      if (getSoundEnabled()) unlockAudio();
       sheet.close();
       nav.toPlayerAdhoc(workout);
     });

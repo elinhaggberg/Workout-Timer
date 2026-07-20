@@ -622,11 +622,15 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 }
 .import-message.error { color: var(--danger); }
 
-.new-interval-btn {
+.new-interval-btn, .add-rest-btn {
+  display: block;
+  width: 100%;
   text-align: left;
   color: var(--accent);
   font-weight: 600;
   padding: 12px 4px;
+}
+.add-rest-btn {
   border-bottom: 1px solid var(--border);
   margin-bottom: 10px;
 }
