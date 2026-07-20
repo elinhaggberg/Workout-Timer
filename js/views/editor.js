@@ -11,7 +11,7 @@ import {
   exportWorkoutData,
   getOrCreateRestDrawerEntry,
 } from "../storage.js";
-import { intervalMeta, isSet, setMeta } from "../util.js";
+import { intervalMeta, isSet, setMeta, sortDrawerRestFirst } from "../util.js";
 import { openSheet } from "../sheet.js";
 import { shareOrDownload, filenameFor } from "../share.js";
 import { CLASSICS } from "../exerciseLibrary.js";
@@ -288,6 +288,19 @@ export function renderEditor(root, nav, workoutId) {
     document.addEventListener("pointercancel", onUp);
   }
 
+  function addRestInterval(targetArray) {
+    const drawerEntry = getOrCreateRestDrawerEntry();
+    const instance = makeIntervalInstance({
+      name: drawerEntry.name,
+      type: drawerEntry.type,
+      amount: drawerEntry.amount,
+      drawerId: drawerEntry.id,
+      isRest: true,
+    });
+    targetArray.push(instance);
+    return instance;
+  }
+
   function openAddChoice(targetArray) {
     const sheet = openSheet("tpl-add-choice");
     sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
@@ -301,11 +314,16 @@ export function renderEditor(root, nav, workoutId) {
       targetArray.push(newSet);
       renderIntervalList(newSet.id);
     });
+    sheet.el.querySelector("#choice-rest").addEventListener("click", () => {
+      sheet.close();
+      const instance = addRestInterval(targetArray);
+      renderIntervalList(instance.id);
+    });
   }
 
   function openPicker(targetArray) {
     const sheet = openSheet("tpl-interval-picker");
-    const drawer = getDrawer().sort((a, b) => a.name.localeCompare(b.name));
+    const drawer = sortDrawerRestFirst(getDrawer());
     const listEl = sheet.el.querySelector("#drawer-list");
     const searchInput = sheet.el.querySelector("#drawer-search");
     const classicsListEl = sheet.el.querySelector("#classics-drawer-list");
@@ -405,15 +423,7 @@ export function renderEditor(root, nav, workoutId) {
       openIntervalForm({ mode: "create", targetArray });
     });
     sheet.el.querySelector(".add-rest-btn").addEventListener("click", () => {
-      const drawerEntry = getOrCreateRestDrawerEntry();
-      const instance = makeIntervalInstance({
-        name: drawerEntry.name,
-        type: drawerEntry.type,
-        amount: drawerEntry.amount,
-        drawerId: drawerEntry.id,
-        isRest: true,
-      });
-      targetArray.push(instance);
+      const instance = addRestInterval(targetArray);
       sheet.close();
       renderIntervalList(instance.id);
     });

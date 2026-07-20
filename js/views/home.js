@@ -20,7 +20,7 @@ import {
   shouldShowBackupBanner,
   getSoundEnabled,
 } from "../storage.js";
-import { workoutMeta, intervalMeta, setMeta, isSet, formatClock } from "../util.js";
+import { workoutMeta, intervalMeta, setMeta, isSet, formatClock, sortDrawerRestFirst } from "../util.js";
 import { unlockAudio } from "../audio.js";
 import { openSheet } from "../sheet.js";
 import { shareOrDownload, filenameFor } from "../share.js";
@@ -213,7 +213,7 @@ export function renderHome(root, nav) {
     const classicsListEl = sheet.el.querySelector("#classics-list");
 
     function renderMine() {
-      const drawer = getDrawer().sort((a, b) => a.name.localeCompare(b.name));
+      const drawer = sortDrawerRestFirst(getDrawer());
       if (drawer.length === 0) {
         const empty = document.createElement("p");
         empty.className = "empty-state";
