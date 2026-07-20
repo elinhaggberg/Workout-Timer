@@ -224,6 +224,7 @@ export function renderHome(root, nav) {
       const itemTpl = document.getElementById("tpl-library-mine-item");
       const nodes = drawer.map((entry) => {
         const node = itemTpl.content.cloneNode(true);
+        node.querySelector(".interval-card").classList.toggle("rest-card", !!entry.isRest);
         node.querySelector(".card-title").textContent = entry.name;
         node.querySelector(".card-meta").textContent = intervalMeta(entry);
         node.querySelector(".edit-btn").addEventListener("click", () => openDrawerEntryForm(entry));
@@ -491,7 +492,7 @@ export function renderHome(root, nav) {
 
   function renderPreviewInterval(interval) {
     const card = document.createElement("div");
-    card.className = "card interval-card preview-card";
+    card.className = "card interval-card preview-card" + (interval.isRest ? " rest-card" : "");
     const main = document.createElement("div");
     main.className = "card-main";
     const title = document.createElement("h3");

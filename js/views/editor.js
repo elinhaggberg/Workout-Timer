@@ -115,6 +115,7 @@ export function renderEditor(root, nav, workoutId) {
     const card = frag.querySelector(".interval-card");
     const handle = frag.querySelector(".drag-handle");
     card.dataset.id = interval.id;
+    card.classList.toggle("rest-card", !!interval.isRest);
     frag.querySelector(".card-title").textContent = interval.name;
     frag.querySelector(".card-meta").textContent = intervalMeta(interval);
     frag.querySelector(".duplicate-btn").addEventListener("click", onDuplicate);
@@ -354,6 +355,7 @@ export function renderEditor(root, nav, workoutId) {
       const itemTpl = document.getElementById("tpl-drawer-item");
       const nodes = matches.map((entry) => {
         const node = itemTpl.content.cloneNode(true);
+        node.querySelector(".drawer-item").classList.toggle("rest-card", !!entry.isRest);
         node.querySelector(".card-title").textContent = entry.name;
         node.querySelector(".card-meta").textContent = intervalMeta(entry);
         node.querySelector("button").addEventListener("click", () => {
