@@ -1087,14 +1087,55 @@ textarea.card-title::placeholder { color: var(--text-dim); font-weight: 600; }
 }
 .goal-status-row {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.goal-status-row + .goal-status-row { margin-top: 12px; }
+.goal-status-row-top {
+  display: flex;
   align-items: center;
   gap: 8px;
 }
-.goal-status-row + .goal-status-row { margin-top: 8px; }
-.goal-status-icon { display: inline-flex; flex-shrink: 0; color: var(--accent); }
+.goal-status-icon { display: inline-flex; flex-shrink: 0; color: var(--accent); position: relative; }
 .goal-status-icon svg { width: 18px; height: 18px; }
 .goal-status-label { flex: 1; }
+.goal-status-count { font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
 .goal-status-streak { flex-shrink: 0; font-weight: 600; color: var(--text); }
+.goal-status-progress-bar {
+  height: 6px;
+  border-radius: 4px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.goal-status-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* A quick radiating pulse from the goal icon, triggered once the counter
+   actually ticks up -- reinforces "this workout just counted toward it"
+   without needing a whole new confetti burst. */
+@keyframes goal-burst {
+  from { transform: scale(0.5); opacity: 0.6; }
+  to { transform: scale(2.4); opacity: 0; }
+}
+.goal-status-icon.burst::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: goal-burst 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes goal-status-pop-in {
+  from { transform: scale(0.4); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.goal-status-streak.pop-in { animation: goal-status-pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .diary-log-row {
   display: flex;
   align-items: center;
